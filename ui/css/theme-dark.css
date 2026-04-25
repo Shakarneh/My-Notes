@@ -1,0 +1,20 @@
+:root {
+    --bg-primary:    #0f0f0f;
+    --bg-secondary:  #1a1a1a;
+    --bg-tertiary:   #242424;
+    --bg-hover:      #2e2e2e;
+    --bg-active:     #333333;
+    --border-color:  #2e2e2e;
+    --text-primary:  #f0f0f0;
+    --text-secondary:#888888;
+    --text-tertiary: #555555;
+    --accent:        #ffffff;
+    --accent-subtle: rgba(255,255,255,0.07);
+    --accent-border: rgba(255,255,255,0.15);
+    --danger:        #e05c5c;
+    --danger-hover:  #c94444;
+    --success:       #5cb85c;
+    --shadow:        0 2px 12px rgba(0,0,0,0.5);
+    --scrollbar-thumb: #333;
+    --scrollbar-track: transparent;
+}
