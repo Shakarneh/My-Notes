@@ -43,6 +43,7 @@ class Api:
     def get_settings(self):
         return {
             "theme_override": database.get_setting("theme_override") or "auto",
+            "language":       database.get_setting("language") or "ar",
         }
 
     def update_setting(self, key, value):

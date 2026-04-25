@@ -4,12 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ملاحظاتي</title>
-
-    <!-- Theme loaded first to prevent flash -->
     <link id="theme-stylesheet" rel="stylesheet" href="css/theme-dark.css">
     <link rel="stylesheet" href="css/main.css">
-
-    <!-- Quill.js -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">
 </head>
 <body>
@@ -18,18 +14,22 @@
     <!-- ═══ SIDEBAR ═══ -->
     <aside id="sidebar">
         <div id="sidebar-header">
-            <span id="app-title">ملاحظاتي</span>
-            <button id="btn-new-note" title="ملاحظة جديدة (Ctrl+N)">+</button>
+            <span id="app-title" data-i18n="app_title">ملاحظاتي</span>
+            <button id="btn-new-note"
+                    data-i18n-title="new_note_tooltip"
+                    title="ملاحظة جديدة (Ctrl+N)">+</button>
         </div>
 
-        <input id="search-box" type="text" placeholder="بحث... (Ctrl+F)" autocomplete="off">
+        <input id="search-box" type="text"
+               placeholder="بحث... (Ctrl+F)"
+               data-i18n-ph="search_placeholder"
+               autocomplete="off">
 
-        <!-- Nav -->
         <div class="nav-item active" id="nav-all-notes">
             <svg viewBox="0 0 16 16" fill="currentColor">
                 <path d="M4 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4zm1 3h6v1H5V5zm0 2.5h6v1H5v-1zm0 2.5h4v1H5v-1z"/>
             </svg>
-            كل الملاحظات
+            <span data-i18n="all_notes">كل الملاحظات</span>
         </div>
 
         <div class="nav-section-divider"></div>
@@ -38,14 +38,23 @@
             <svg viewBox="0 0 16 16" fill="currentColor">
                 <path d="M5.5 1a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H6a.5.5 0 0 1-.5-.5ZM3 3h10v1H3V3Zm1 1.5v8A1.5 1.5 0 0 0 5.5 14h5A1.5 1.5 0 0 0 12 12.5v-8H4Zm2 1.5a.5.5 0 0 1 1 0v6a.5.5 0 0 1-1 0V6Zm3 0a.5.5 0 0 1 1 0v6a.5.5 0 0 1-1 0V6Z"/>
             </svg>
-            سلة المهملات
+            <span data-i18n="trash">سلة المهملات</span>
             <span class="badge" id="trash-badge" style="display:none">0</span>
+        </div>
+
+        <!-- Language Switcher -->
+        <div id="sidebar-footer">
+            <div id="lang-switcher">
+                <button class="lang-btn active" data-lang="ar">ع</button>
+                <button class="lang-btn" data-lang="en">EN</button>
+                <button class="lang-btn" data-lang="ru">РУ</button>
+            </div>
         </div>
     </aside>
 
     <!-- ═══ NOTES PANEL ═══ -->
     <div id="notes-panel">
-        <div id="notes-panel-header">الملاحظات</div>
+        <div id="notes-panel-header" data-i18n="notes_count">الملاحظات</div>
         <div id="notes-list"></div>
     </div>
 
@@ -58,25 +67,24 @@
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
             </svg>
-            <p>اختر ملاحظة أو أنشئ واحدة جديدة</p>
+            <p data-i18n="no_note_msg">اختر ملاحظة أو أنشئ واحدة جديدة</p>
         </div>
 
-        <!-- Editor content (hidden until a note is selected) -->
-        <div id="editor-content" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
-
+        <!-- Editor -->
+        <div id="editor-content">
             <!-- Toolbar -->
             <div id="editor-toolbar">
-                <button class="toolbar-btn" data-format="bold" title="عريض (Ctrl+B)"><b>B</b></button>
-                <button class="toolbar-btn" data-format="italic" title="مائل (Ctrl+I)"><i>I</i></button>
-                <button class="toolbar-btn" data-format="underline" title="تسطير (Ctrl+U)"><u>U</u></button>
-                <button class="toolbar-btn" data-format="strike" title="يتوسطه خط">
+                <button class="toolbar-btn" data-format="bold" title="Bold (Ctrl+B)"><b>B</b></button>
+                <button class="toolbar-btn" data-format="italic" title="Italic (Ctrl+I)"><i>I</i></button>
+                <button class="toolbar-btn" data-format="underline" title="Underline (Ctrl+U)"><u>U</u></button>
+                <button class="toolbar-btn" data-format="strike" title="Strikethrough">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.527 8.5H3.5a.5.5 0 0 1 0-1h9a.5.5 0 0 1 0 1h-4.473zM7 5.5a2 2 0 0 0-2 2H4a3 3 0 0 1 6 0H9a2 2 0 0 0-2-2zm1 5h1a2 2 0 0 1-4 0h1a1 1 0 0 0 2 0z"/></svg>
                 </button>
 
                 <div class="toolbar-divider"></div>
 
-                <select class="toolbar-select" id="font-size-select" title="حجم الخط">
-                    <option value="">حجم</option>
+                <select class="toolbar-select" id="font-size-select">
+                    <option value="">—</option>
                     <option value="12px">12</option>
                     <option value="14px">14</option>
                     <option value="16px">16</option>
@@ -87,43 +95,43 @@
                     <option value="32px">32</option>
                 </select>
 
-                <select class="toolbar-select" id="font-family-select" title="نوع الخط">
-                    <option value="">خط</option>
-                    <option value="tajawal">تجوال (عربي)</option>
+                <select class="toolbar-select" id="font-family-select">
+                    <option value="">Aa</option>
+                    <option value="tajawal">تجوال</option>
                     <option value="ibmplexsans">IBM Plex</option>
-                    <option value="monospace">Monospace</option>
+                    <option value="monospace">Mono</option>
                 </select>
 
                 <div class="toolbar-divider"></div>
 
-                <button class="toolbar-btn" data-align="right" title="محاذاة يمين">
+                <button class="toolbar-btn" data-align="right" title="Align Right">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 12.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-4-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm4-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-4-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg>
                 </button>
-                <button class="toolbar-btn" data-align="center" title="توسيط">
+                <button class="toolbar-btn" data-align="center" title="Center">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 12.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg>
                 </button>
-                <button class="toolbar-btn" data-align="false" title="محاذاة يسار">
+                <button class="toolbar-btn" data-align="false" title="Align Left">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 12.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg>
                 </button>
 
                 <div class="toolbar-divider"></div>
 
-                <button class="toolbar-btn" data-format="list" data-value="ordered" title="قائمة مرقمة">
+                <button class="toolbar-btn" data-format="list" data-value="ordered" title="Ordered List">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 5 3.5zM1.713 11.865v-.474H2c.217 0 .363-.137.363-.317 0-.185-.158-.31-.361-.31-.223 0-.367.152-.373.31h-.59c.016-.467.373-.787.986-.787.588 0 .954.291.954.756 0 .312-.19.551-.471.639v.022c.35.069.569.31.569.665 0 .557-.396.886-1.018.886-.63 0-1.008-.345-1.005-.868h.596c.01.186.165.316.409.316.25 0 .384-.139.384-.342 0-.195-.155-.325-.415-.325h-.3zm-.004-4.699h-.604v-.035c0-.408.295-.844.958-.844.583 0 .96.326.96.756 0 .389-.257.617-.476.848l-.537.572v.03h1.054V9H1.143v-.395l.957-.99c.138-.142.293-.304.293-.508 0-.18-.147-.32-.342-.32a.33.33 0 0 0-.342.338v.041zM2.564 5h-.635V2.924h-.031l-.598.42v-.567l.629-.443h.635V5z"/></svg>
                 </button>
-                <button class="toolbar-btn" data-format="list" data-value="bullet" title="قائمة نقطية">
+                <button class="toolbar-btn" data-format="list" data-value="bullet" title="Bullet List">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 5 3.5zM2 3.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm0 4a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm0 4a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z"/></svg>
                 </button>
-                <button class="toolbar-btn" data-format="list" data-value="checked" title="مهام (Checklist)">
+                <button class="toolbar-btn" data-format="list" data-value="checked" title="Checklist">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zm-2.5 7.5-3.5 3.5-1.5-1.5-.7.7 2.2 2.2 4.2-4.2-.7-.7z"/></svg>
                 </button>
 
                 <div class="toolbar-divider"></div>
 
-                <button class="toolbar-btn" data-format="blockquote" title="اقتباس">
+                <button class="toolbar-btn" data-format="blockquote" title="Quote">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M12 12a1 1 0 0 0 1-1V8.558a1 1 0 0 0-1-1h-1.388q0-.527.062-1.054.093-.558.31-.992t.559-.683q.34-.279.868-.279V3q-.868 0-1.52.372a3.3 3.3 0 0 0-1.085.992 4.9 4.9 0 0 0-.62 1.458A7.7 7.7 0 0 0 9 7.558V11a1 1 0 0 0 1 1zm-6 0a1 1 0 0 0 1-1V8.558a1 1 0 0 0-1-1H4.612q0-.527.062-1.054.094-.558.31-.992.217-.434.559-.683.34-.279.868-.279V3q-.868 0-1.52.372a3.3 3.3 0 0 0-1.085.992 4.9 4.9 0 0 0-.62 1.458A7.7 7.7 0 0 0 3 7.558V11a1 1 0 0 0 1 1z"/></svg>
                 </button>
-                <button class="toolbar-btn" data-format="code-block" title="كود">
+                <button class="toolbar-btn" data-format="code-block" title="Code">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5.854 4.854a.5.5 0 1 0-.708-.708l-3.5 3.5a.5.5 0 0 0 0 .708l3.5 3.5a.5.5 0 0 0 .708-.708L2.707 8l3.147-3.146zm4.292 0a.5.5 0 0 1 .708-.708l3.5 3.5a.5.5 0 0 1 0 .708l-3.5 3.5a.5.5 0 0 1-.708-.708L13.293 8l-3.147-3.146z"/></svg>
                 </button>
 
@@ -132,7 +140,10 @@
             </div>
 
             <!-- Title -->
-            <input id="note-title-input" type="text" placeholder="عنوان الملاحظة...">
+            <input id="note-title-input" type="text"
+                   placeholder="عنوان الملاحظة..."
+                   data-i18n-ph="title_placeholder">
+            <div class="title-divider"></div>
 
             <!-- Editor -->
             <div id="editor-wrapper">
@@ -141,10 +152,10 @@
         </div>
 
         <!-- Trash Panel -->
-        <div id="trash-panel" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+        <div id="trash-panel">
             <div id="trash-header">
-                <h2>سلة المهملات</h2>
-                <button id="btn-empty-trash">تفريغ السلة</button>
+                <h2 data-i18n="trash_title">سلة المهملات</h2>
+                <button id="btn-empty-trash" data-i18n="empty_trash_btn">تفريغ السلة</button>
             </div>
             <div id="trash-list"></div>
         </div>
@@ -154,12 +165,13 @@
 
 <!-- Status bar -->
 <div id="status-bar">
-    <span>ملاحظاتي v1.0</span>
+    <span data-i18n="version">ملاحظاتي v1.0</span>
     <span id="word-count"></span>
 </div>
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script src="js/i18n.js"></script>
 <script src="js/theme.js"></script>
 <script src="js/editor.js"></script>
 <script src="js/notes.js"></script>
@@ -167,8 +179,6 @@
 <script src="js/app.js"></script>
 
 <script>
-// Apply theme class from stylesheet link before pywebview is ready
-// to avoid flash — reads from the link tag we set in Python
 (function() {
     const hour = new Date().getHours();
     const isDark = hour < 7 || hour >= 19;

@@ -33,6 +33,7 @@ def init_db():
             );
 
             INSERT OR IGNORE INTO settings(key, value) VALUES ('theme_override', 'auto');
+            INSERT OR IGNORE INTO settings(key, value) VALUES ('language', 'ar');
         """)
         purge_old_trash(conn)
 

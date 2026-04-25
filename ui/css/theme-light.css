@@ -1,20 +1,36 @@
 :root {
-    --bg-primary:    #f5f5f5;
-    --bg-secondary:  #ebebeb;
-    --bg-tertiary:   #ffffff;
+    --bg-base:       #e8e8e8;
+    --bg-primary:    #f0f0f0;
+    --bg-secondary:  #e6e6e6;
+    --bg-tertiary:   #fafafa;
+    --bg-elevated:   #ffffff;
     --bg-hover:      #e0e0e0;
-    --bg-active:     #d5d5d5;
-    --border-color:  #d8d8d8;
-    --text-primary:  #111111;
+    --bg-active:     #d8d8d8;
+
+    --border-color:  #dcdcdc;
+    --border-mid:    #d0d0d0;
+    --border-light:  #c8c8c8;
+
+    --text-primary:  #141414;
     --text-secondary:#666666;
-    --text-tertiary: #aaaaaa;
+    --text-tertiary: #bbbbbb;
+
     --accent:        #1a1a1a;
     --accent-subtle: rgba(0,0,0,0.05);
-    --accent-border: rgba(0,0,0,0.12);
-    --danger:        #d9534f;
-    --danger-hover:  #c0302c;
-    --success:       #4a9e4a;
-    --shadow:        0 2px 12px rgba(0,0,0,0.1);
-    --scrollbar-thumb: #ccc;
+    --accent-border: rgba(0,0,0,0.14);
+    --accent-glow:   rgba(0,0,0,0.03);
+
+    --danger:        #c0392b;
+    --danger-hover:  #a93226;
+    --success:       #27ae60;
+
+    --shadow-xs: 0 1px 2px rgba(0,0,0,0.08);
+    --shadow-sm: 0 2px 6px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.1);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.08);
+
+    --inset-top: inset 0 1px 0 rgba(255,255,255,0.8);
+
+    --scrollbar-thumb: #c8c8c8;
     --scrollbar-track: transparent;
 }
