@@ -15,6 +15,8 @@ A desktop notes app for Windows with Arabic RTL support, rich text editor, and a
 - **Trash bin** — deleted notes are kept for 90 days before permanent deletion
 - **Pin notes** — keep important notes at the top
 - **Search** — instantly search through all your notes
+- **Spell check** — right-click any misspelled word to ignore its underline
+- **Image support** — insert images or paste screenshots directly into notes
 
 ## Requirements
 
@@ -24,7 +26,7 @@ A desktop notes app for Windows with Arabic RTL support, rich text editor, and a
 
 ## Installation
 
-1. Download `MyNotes-Setup-v1.0.0.exe` from the [Releases page](https://github.com/Shakarneh/My-Notes/releases)
+1. Download `MyNotes-Setup-v1.1.0.exe` from the [Releases page](https://github.com/Shakarneh/My-Notes/releases)
 2. Run the installer and follow the steps
 3. Launch **My Notes** from the desktop shortcut or Start Menu
 
