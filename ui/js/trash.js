@@ -61,7 +61,7 @@ const Trash = (() => {
         const badge = document.getElementById('trash-badge');
         if (badge) {
             badge.textContent = items.length;
-            badge.style.display = items.length ? 'inline' : 'none';
+            badge.style.display = items.length ? 'flex' : 'none';
         }
     }
 

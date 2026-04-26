@@ -19,10 +19,7 @@ html, body {
 /* ─── Scrollbar ─────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
-::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-thumb);
-    border-radius: 10px;
-}
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
 
 /* ─── Layout ─────────────────────────────────────── */
@@ -49,7 +46,6 @@ html, body {
     box-shadow: 2px 0 12px rgba(0,0,0,0.25);
 }
 
-/* Subtle top gradient for depth */
 .theme-dark #sidebar {
     background: linear-gradient(180deg, #161616 0%, #121212 60%, #111111 100%);
 }
@@ -57,22 +53,107 @@ html, body {
     background: linear-gradient(180deg, #e8e8e8 0%, #e4e4e4 100%);
 }
 
+/* ─── Sidebar header ─────────────────────────────── */
 #sidebar-header {
-    padding: 18px 16px 14px;
+    padding: 12px 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid var(--border-color);
+    gap: 6px;
+}
+
+#app-brand {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+#app-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
 }
 
 #app-title {
-    font-family: 'Tajawal', 'IBM Plex Sans', sans-serif;
-    font-size: 17px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
     font-weight: 700;
     color: var(--text-primary);
     letter-spacing: -0.2px;
+    white-space: nowrap;
 }
 
+#app-version {
+    font-size: 9px;
+    color: var(--text-tertiary);
+    font-weight: 500;
+    background: var(--bg-active);
+    padding: 1px 5px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+#header-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+/* Trash icon button */
+#btn-trash-icon {
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--border-mid);
+    background: var(--bg-elevated);
+    border-radius: 7px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-xs);
+    transition: all 0.15s;
+    position: relative;
+}
+#btn-trash-icon:hover {
+    background: var(--bg-hover);
+    color: var(--danger);
+    border-color: rgba(217,92,92,0.35);
+}
+#btn-trash-icon.active {
+    background: rgba(217,92,92,0.1);
+    color: var(--danger);
+    border-color: rgba(217,92,92,0.35);
+}
+#btn-trash-icon svg { width: 13px; height: 13px; }
+
+/* Badge on trash icon */
+.trash-count-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--danger);
+    color: #fff;
+    font-size: 9px;
+    min-width: 14px;
+    height: 14px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    padding: 0 3px;
+    line-height: 1;
+}
+
+/* New note button */
 #btn-new-note {
     width: 26px;
     height: 26px;
@@ -97,6 +178,7 @@ html, body {
     box-shadow: var(--shadow-sm);
 }
 
+/* ─── Search ─────────────────────────────────────── */
 #search-box {
     margin: 12px 12px 8px;
     padding: 7px 10px;
@@ -128,7 +210,6 @@ html, body {
     color: var(--text-secondary);
     transition: background 0.12s, color 0.12s;
     position: relative;
-    border-radius: 0;
 }
 .nav-item:hover {
     background: var(--accent-subtle);
@@ -145,23 +226,98 @@ html[dir="ltr"] .nav-item.active {
 .nav-item svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.7; }
 .nav-item.active svg { opacity: 1; }
 
-.badge {
-    margin-inline-start: auto;
-    background: var(--danger);
-    color: #fff;
-    font-size: 10px;
-    padding: 1px 5px;
-    border-radius: 10px;
-    min-width: 18px;
-    text-align: center;
-    font-weight: 600;
+/* ─── Update banner ──────────────────────────────── */
+#update-banner {
+    margin: 8px 10px;
+    padding: 10px 12px;
+    background: #fef9c3;
+    border: 1px solid #fde047;
+    border-radius: 12px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 6px;
+    box-shadow: 0 2px 10px rgba(253,224,71,0.25);
+}
+.theme-dark #update-banner {
+    background: rgba(253,224,71,0.08);
+    border-color: rgba(253,224,71,0.25);
+    box-shadow: 0 2px 10px rgba(253,224,71,0.1);
 }
 
-.nav-section-divider {
-    height: 1px;
-    background: var(--border-color);
-    margin: 6px 0;
+#update-banner-body {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
 }
+
+.update-icon {
+    width: 14px;
+    height: 14px;
+    color: #a16207;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+.theme-dark .update-icon { color: #fde047; }
+
+#update-text {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+#update-version-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #713f12;
+    line-height: 1.3;
+}
+.theme-dark #update-version-label { color: #fef08a; }
+
+#btn-download-update {
+    font-size: 10px;
+    font-weight: 600;
+    color: #92400e;
+    background: rgba(161,98,7,0.15);
+    border: 1px solid rgba(161,98,7,0.3);
+    border-radius: 5px;
+    padding: 3px 8px;
+    cursor: pointer;
+    font-family: 'IBM Plex Sans', sans-serif;
+    transition: background 0.15s;
+    white-space: nowrap;
+    align-self: flex-start;
+}
+.theme-dark #btn-download-update {
+    color: #fef08a;
+    background: rgba(253,224,71,0.12);
+    border-color: rgba(253,224,71,0.3);
+}
+#btn-download-update:hover { background: rgba(161,98,7,0.25); }
+.theme-dark #btn-download-update:hover { background: rgba(253,224,71,0.2); }
+
+#btn-dismiss-update {
+    width: 18px;
+    height: 18px;
+    border: none;
+    background: transparent;
+    color: #92400e;
+    cursor: pointer;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    flex-shrink: 0;
+    padding: 0;
+    opacity: 0.6;
+    line-height: 1;
+}
+.theme-dark #btn-dismiss-update { color: #fde047; }
+#btn-dismiss-update:hover { opacity: 1; }
 
 /* ─── Language Switcher ──────────────────────────── */
 #sidebar-footer {
@@ -178,6 +334,7 @@ html[dir="ltr"] .nav-item.active {
     border-radius: 8px;
     padding: 3px;
     box-shadow: var(--inset-top);
+    direction: ltr; /* Always show AR | EN | RU regardless of app direction */
 }
 
 .lang-btn {
@@ -226,26 +383,44 @@ html[dir="ltr"] .nav-item.active {
     background: var(--bg-primary);
 }
 
-#notes-list { overflow-y: auto; flex: 1; }
+#notes-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 8px 0 16px;
+}
 
-/* ─── Note Cards ─────────────────────────────────── */
+/* ─── Date section labels ────────────────────────── */
+.notes-section-label {
+    padding: 10px 14px 4px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    user-select: none;
+}
+.notes-section-label:first-child { padding-top: 4px; }
+
+/* ─── Note Cards (rounded rectangles) ───────────── */
 .note-card {
-    padding: 12px 16px;
+    margin: 0 8px 6px;
+    padding: 12px 14px;
     cursor: pointer;
-    border-bottom: 1px solid var(--border-color);
-    transition: background 0.12s, box-shadow 0.12s;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-elevated);
+    transition: all 0.15s;
     position: relative;
 }
 .note-card:hover {
-    background: var(--bg-elevated);
-    box-shadow: var(--inset-top);
+    background: var(--bg-hover);
+    border-color: var(--border-mid);
+    box-shadow: var(--shadow-sm);
 }
 .note-card.active {
-    background: var(--bg-elevated);
-    box-shadow: inset 3px 0 0 var(--accent), var(--inset-top);
-}
-html[dir="ltr"] .note-card.active {
-    box-shadow: inset -3px 0 0 var(--accent), var(--inset-top);
+    background: var(--bg-active);
+    border-color: var(--accent-border);
+    box-shadow: 0 0 0 1.5px var(--accent-border), var(--shadow-sm);
 }
 
 .note-card-title {
@@ -258,7 +433,6 @@ html[dir="ltr"] .note-card.active {
     margin-bottom: 4px;
     font-family: 'IBM Plex Sans', 'Tajawal', sans-serif;
 }
-.note-card.active .note-card-title { color: var(--text-primary); }
 
 .note-card-preview {
     font-size: 12px;
@@ -269,6 +443,8 @@ html[dir="ltr"] .note-card.active {
     margin-bottom: 6px;
     line-height: 1.4;
 }
+
+.note-card-empty { color: var(--text-tertiary); }
 
 .note-card-meta {
     display: flex;
@@ -369,6 +545,27 @@ html[dir="ltr"] .note-card.active {
 }
 .toolbar-btn svg { width: 14px; height: 14px; }
 
+/* Color button */
+.color-btn {
+    flex-direction: column;
+    gap: 2px;
+    height: 32px;
+    width: 30px;
+}
+.color-btn-label {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+}
+.color-btn-bar {
+    display: block;
+    width: 14px;
+    height: 3px;
+    background: #e74c3c;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
 .toolbar-select {
     height: 28px;
     border: 1px solid var(--border-color);
@@ -409,15 +606,14 @@ html[dir="ltr"] .note-card.active {
 }
 #note-title-input::placeholder { color: var(--text-tertiary); }
 
-/* ─── Title / Editor divider ─────────────────────── */
 .title-divider {
     height: 1px;
     background: var(--border-color);
-    margin: 0 28px 0;
+    margin: 0 28px;
     opacity: 0.5;
 }
 
-/* ─── Quill ──────────────────────────────────────── */
+/* ─── Quill editor ───────────────────────────────── */
 #editor-wrapper {
     flex: 1;
     overflow: hidden;
@@ -444,11 +640,20 @@ html[dir="ltr"] .note-card.active {
     inset-inline-end: auto !important;
 }
 
-/* Quill checklist */
+/* Images inside notes */
+.ql-editor img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin: 8px 0;
+    display: block;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Checklist */
 .ql-editor li[data-list=checked] > .ql-ui::before { color: var(--success) !important; }
 .ql-editor li[data-list=unchecked] > .ql-ui::before { color: var(--text-tertiary) !important; }
 
-/* Quill blockquote */
+/* Blockquote */
 .ql-editor blockquote {
     border-inline-start: 3px solid var(--border-light) !important;
     padding-inline-start: 16px !important;
@@ -456,12 +661,61 @@ html[dir="ltr"] .note-card.active {
     border-right: none !important;
 }
 
-/* Quill code */
+/* Code */
 .ql-editor code, .ql-editor pre {
     background: var(--bg-secondary) !important;
     color: var(--text-primary) !important;
     border-radius: 6px !important;
     border: 1px solid var(--border-mid) !important;
+}
+
+/* ─── Floating selection toolbar ─────────────────── */
+#selection-toolbar {
+    position: fixed;
+    z-index: 1000;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-mid);
+    border-radius: 10px;
+    padding: 4px 6px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    box-shadow: var(--shadow-md);
+    pointer-events: all;
+    direction: ltr;
+}
+
+#selection-toolbar button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: 'IBM Plex Sans', 'Tajawal', sans-serif;
+    transition: background 0.12s, color 0.12s;
+    white-space: nowrap;
+}
+#selection-toolbar button:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+#selection-toolbar button svg {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+}
+
+.sel-sep {
+    width: 1px;
+    height: 18px;
+    background: var(--border-mid);
+    margin: 0 2px;
+    flex-shrink: 0;
 }
 
 /* ─── No Note Selected ───────────────────────────── */
@@ -593,7 +847,7 @@ html[dir="ltr"] .note-card.active {
     font-family: 'IBM Plex Sans', 'Tajawal', sans-serif;
 }
 #save-indicator.saving { color: var(--text-secondary); }
-#save-indicator.saved { color: var(--success); }
+#save-indicator.saved  { color: var(--success); }
 
 /* ─── Editor content wrapper ─────────────────────── */
 #editor-content {

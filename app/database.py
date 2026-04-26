@@ -13,7 +13,7 @@ def init_db():
         conn.executescript("""
             CREATE TABLE IF NOT EXISTS notes (
                 id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                title         TEXT    NOT NULL DEFAULT 'ملاحظة جديدة',
+                title         TEXT    NOT NULL DEFAULT '',
                 content       TEXT    NOT NULL DEFAULT '',
                 content_plain TEXT    NOT NULL DEFAULT '',
                 created_at    TEXT    NOT NULL DEFAULT (datetime('now')),
@@ -79,7 +79,7 @@ def get_note(note_id: int):
 def create_note():
     with get_connection() as conn:
         cursor = conn.execute(
-            "INSERT INTO notes (title, content, content_plain) VALUES ('ملاحظة جديدة', '', '')"
+            "INSERT INTO notes (title, content, content_plain) VALUES ('', '', '')"
         )
         conn.commit()
         return cursor.lastrowid

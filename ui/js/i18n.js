@@ -2,7 +2,7 @@ const I18n = (() => {
     const translations = {
         ar: {
             dir: 'rtl',
-            app_title: 'ملاحظاتي',
+            app_title: 'My Note',
             all_notes: 'كل الملاحظات',
             trash: 'سلة المهملات',
             search_placeholder: 'بحث... (Ctrl+F)',
@@ -25,16 +25,25 @@ const I18n = (() => {
             title_placeholder: 'عنوان الملاحظة...',
             notes_count: 'الملاحظات ({n})',
             search_results: 'نتائج البحث ({n})',
-            version: 'ملاحظاتي v1.0',
             no_content: 'لا يوجد محتوى',
             time_now: 'الآن',
             time_min: '{n} د',
             time_hour: '{n} س',
             time_day: '{n} ي',
+            today: 'اليوم',
+            yesterday: 'أمس',
+            copy: 'نسخ',
+            paste: 'لصق',
+            translate: 'ترجمة',
+            search_web: 'بحث',
+            ignore_spell: 'تجاهل',
+            update_available: 'متاح',
+            download_now: 'تنزيل الآن',
+            word_count: '{n} كلمة',
         },
         en: {
             dir: 'ltr',
-            app_title: 'My Notes',
+            app_title: 'My Note',
             all_notes: 'All Notes',
             trash: 'Trash',
             search_placeholder: 'Search... (Ctrl+F)',
@@ -57,16 +66,25 @@ const I18n = (() => {
             title_placeholder: 'Note title...',
             notes_count: 'Notes ({n})',
             search_results: 'Search results ({n})',
-            version: 'My Notes v1.0',
             no_content: 'No content',
             time_now: 'Just now',
             time_min: '{n}m',
             time_hour: '{n}h',
             time_day: '{n}d',
+            today: 'Today',
+            yesterday: 'Yesterday',
+            copy: 'Copy',
+            paste: 'Paste',
+            translate: 'Translate',
+            search_web: 'Search',
+            ignore_spell: 'Ignore',
+            update_available: 'available',
+            download_now: 'Download now',
+            word_count: '{n} words',
         },
         ru: {
             dir: 'ltr',
-            app_title: 'Мои заметки',
+            app_title: 'My Note',
             all_notes: 'Все заметки',
             trash: 'Корзина',
             search_placeholder: 'Поиск... (Ctrl+F)',
@@ -89,12 +107,21 @@ const I18n = (() => {
             title_placeholder: 'Заголовок...',
             notes_count: 'Заметки ({n})',
             search_results: 'Результаты ({n})',
-            version: 'Мои заметки v1.0',
             no_content: 'Нет содержимого',
             time_now: 'Только что',
             time_min: '{n}м',
             time_hour: '{n}ч',
             time_day: '{n}д',
+            today: 'Сегодня',
+            yesterday: 'Вчера',
+            copy: 'Копировать',
+            paste: 'Вставить',
+            translate: 'Перевести',
+            search_web: 'Поиск',
+            ignore_spell: 'Игнорировать',
+            update_available: 'доступна',
+            download_now: 'Скачать',
+            word_count: '{n} слов',
         },
     };
 
@@ -138,6 +165,12 @@ const I18n = (() => {
         // Update Quill placeholder if editor is ready
         const editorRoot = document.querySelector('.ql-editor');
         if (editorRoot) editorRoot.dataset.placeholder = t('editor_placeholder');
+
+        // Update notes panel header if visible
+        const panelHeader = document.getElementById('notes-panel-header');
+        if (panelHeader && !panelHeader.dataset.count) {
+            panelHeader.textContent = t('all_notes');
+        }
     }
 
     async function init() {

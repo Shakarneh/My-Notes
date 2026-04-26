@@ -2,7 +2,7 @@ import os
 import sys
 
 APP_NAME = "NotesApp"
-APP_TITLE = "ملاحظاتي"
+APP_TITLE = "My Note"
 APP_WIDTH = 1200
 APP_HEIGHT = 800
 TRASH_DAYS = 90

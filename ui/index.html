@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ملاحظاتي</title>
+    <title>My Note</title>
     <link id="theme-stylesheet" rel="stylesheet" href="css/theme-dark.css">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">
@@ -14,14 +14,33 @@
     <!-- ═══ SIDEBAR ═══ -->
     <aside id="sidebar">
         <div id="sidebar-header">
-            <span id="app-title" data-i18n="app_title">ملاحظاتي</span>
-            <button id="btn-new-note"
-                    data-i18n-title="new_note_tooltip"
-                    title="ملاحظة جديدة (Ctrl+N)">+</button>
+            <div id="app-brand">
+                <svg id="app-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10 9 9 9 8 9"/>
+                </svg>
+                <span id="app-title">My Note</span>
+                <span id="app-version">v1.0</span>
+            </div>
+            <div id="header-actions">
+                <button id="btn-trash-icon" title="Trash">
+                    <svg viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M5.5 1a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H6a.5.5 0 0 1-.5-.5ZM3 3h10v1H3V3Zm1 1.5v8A1.5 1.5 0 0 0 5.5 14h5A1.5 1.5 0 0 0 12 12.5v-8H4Zm2 1.5a.5.5 0 0 1 1 0v6a.5.5 0 0 1-1 0V6Zm3 0a.5.5 0 0 1 1 0v6a.5.5 0 0 1-1 0V6Z"/>
+                    </svg>
+                    <span class="trash-count-badge" id="trash-badge" style="display:none">0</span>
+                </button>
+                <button id="btn-new-note"
+                        data-i18n-title="new_note_tooltip"
+                        title="New Note (Ctrl+N)">+</button>
+            </div>
         </div>
 
         <input id="search-box" type="text"
-               placeholder="بحث... (Ctrl+F)"
+               placeholder="Search... (Ctrl+F)"
                data-i18n-ph="search_placeholder"
                autocomplete="off">
 
@@ -29,20 +48,24 @@
             <svg viewBox="0 0 16 16" fill="currentColor">
                 <path d="M4 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4zm1 3h6v1H5V5zm0 2.5h6v1H5v-1zm0 2.5h4v1H5v-1z"/>
             </svg>
-            <span data-i18n="all_notes">كل الملاحظات</span>
+            <span data-i18n="all_notes">All Notes</span>
         </div>
 
-        <div class="nav-section-divider"></div>
-
-        <div class="nav-item" id="nav-trash">
-            <svg viewBox="0 0 16 16" fill="currentColor">
-                <path d="M5.5 1a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H6a.5.5 0 0 1-.5-.5ZM3 3h10v1H3V3Zm1 1.5v8A1.5 1.5 0 0 0 5.5 14h5A1.5 1.5 0 0 0 12 12.5v-8H4Zm2 1.5a.5.5 0 0 1 1 0v6a.5.5 0 0 1-1 0V6Zm3 0a.5.5 0 0 1 1 0v6a.5.5 0 0 1-1 0V6Z"/>
-            </svg>
-            <span data-i18n="trash">سلة المهملات</span>
-            <span class="badge" id="trash-badge" style="display:none">0</span>
+        <!-- Update banner (shown when newer version is available) -->
+        <div id="update-banner" style="display:none">
+            <div id="update-banner-body">
+                <svg viewBox="0 0 16 16" fill="currentColor" class="update-icon">
+                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                </svg>
+                <div id="update-text">
+                    <span id="update-version-label"></span>
+                    <button id="btn-download-update" data-i18n="download_now">Download now</button>
+                </div>
+            </div>
+            <button id="btn-dismiss-update" aria-label="Dismiss">×</button>
         </div>
 
-        <!-- Language Switcher -->
+        <!-- Language Switcher (always at bottom, always LTR order) -->
         <div id="sidebar-footer">
             <div id="lang-switcher">
                 <button class="lang-btn active" data-lang="ar">ع</button>
@@ -54,7 +77,7 @@
 
     <!-- ═══ NOTES PANEL ═══ -->
     <div id="notes-panel">
-        <div id="notes-panel-header" data-i18n="notes_count">الملاحظات</div>
+        <div id="notes-panel-header">All Notes</div>
         <div id="notes-list"></div>
     </div>
 
@@ -67,7 +90,7 @@
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
             </svg>
-            <p data-i18n="no_note_msg">اختر ملاحظة أو أنشئ واحدة جديدة</p>
+            <p data-i18n="no_note_msg">Select a note or create a new one</p>
         </div>
 
         <!-- Editor -->
@@ -80,6 +103,14 @@
                 <button class="toolbar-btn" data-format="strike" title="Strikethrough">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.527 8.5H3.5a.5.5 0 0 1 0-1h9a.5.5 0 0 1 0 1h-4.473zM7 5.5a2 2 0 0 0-2 2H4a3 3 0 0 1 6 0H9a2 2 0 0 0-2-2zm1 5h1a2 2 0 0 1-4 0h1a1 1 0 0 0 2 0z"/></svg>
                 </button>
+
+                <!-- Text color -->
+                <button class="toolbar-btn color-btn" id="btn-text-color" title="Text Color">
+                    <span class="color-btn-label">A</span>
+                    <span class="color-btn-bar" id="color-btn-bar"></span>
+                </button>
+                <input type="color" id="color-picker-input" value="#e74c3c"
+                       style="visibility:hidden;position:absolute;width:0;height:0">
 
                 <div class="toolbar-divider"></div>
 
@@ -104,13 +135,14 @@
 
                 <div class="toolbar-divider"></div>
 
+                <!-- Alignment: right / center / left  (left = remove align in Quill) -->
                 <button class="toolbar-btn" data-align="right" title="Align Right">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 12.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-4-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm4-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-4-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg>
                 </button>
                 <button class="toolbar-btn" data-align="center" title="Center">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 12.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg>
                 </button>
-                <button class="toolbar-btn" data-align="false" title="Align Left">
+                <button class="toolbar-btn" data-align="left" title="Align Left">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 12.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg>
                 </button>
 
@@ -135,13 +167,18 @@
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5.854 4.854a.5.5 0 1 0-.708-.708l-3.5 3.5a.5.5 0 0 0 0 .708l3.5 3.5a.5.5 0 0 0 .708-.708L2.707 8l3.147-3.146zm4.292 0a.5.5 0 0 1 .708-.708l3.5 3.5a.5.5 0 0 1 0 .708l-3.5 3.5a.5.5 0 0 1-.708-.708L13.293 8l-3.147-3.146z"/></svg>
                 </button>
 
+                <!-- Insert image -->
+                <button class="toolbar-btn" id="btn-insert-image" title="Insert Image">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>
+                </button>
+
                 <div style="flex:1"></div>
                 <span id="save-indicator"></span>
             </div>
 
             <!-- Title -->
             <input id="note-title-input" type="text"
-                   placeholder="عنوان الملاحظة..."
+                   placeholder="Note title..."
                    data-i18n-ph="title_placeholder">
             <div class="title-divider"></div>
 
@@ -154,8 +191,8 @@
         <!-- Trash Panel -->
         <div id="trash-panel">
             <div id="trash-header">
-                <h2 data-i18n="trash_title">سلة المهملات</h2>
-                <button id="btn-empty-trash" data-i18n="empty_trash_btn">تفريغ السلة</button>
+                <h2 data-i18n="trash_title">Trash</h2>
+                <button id="btn-empty-trash" data-i18n="empty_trash_btn">Empty Trash</button>
             </div>
             <div id="trash-list"></div>
         </div>
@@ -163,9 +200,35 @@
     </main>
 </div>
 
+<!-- Floating selection toolbar -->
+<div id="selection-toolbar" style="display:none">
+    <button id="sel-copy">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H6zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1H2z"/></svg>
+        <span data-i18n="copy">Copy</span>
+    </button>
+    <button id="sel-paste">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg>
+        <span data-i18n="paste">Paste</span>
+    </button>
+    <div class="sel-sep"></div>
+    <button id="sel-translate">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.545 6.714 4.11 8H3l1.862-5h1.284L8 8H6.833l-.435-1.286H4.545zm1.634-.736L5.5 3.956h-.049l-.679 2.022H6.18z"/><path d="M0 2a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v3h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-3H2a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H2zm7.138 9.995c.193.301.402.583.63.846-.748.575-1.673 1.001-2.768 1.292.178.217.457.635.457.635-.936.223-1.592.232-2.253.159.048.184.086.371.112.559 3.078-.081 5.95-1.055 7.124-2.882a.961.961 0 0 0-.085-.032 15.308 15.308 0 0 1-.043-2.573C12.938 7.67 14 8.83 14 10a2 2 0 0 1-2 2 2 2 0 0 1-2-2c0-.794.5-1.5 1.138-1.879.027.08.15.293.15.293L9.138 10.995z"/></svg>
+        <span data-i18n="translate">Translate</span>
+    </button>
+    <button id="sel-search">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
+        <span data-i18n="search_web">Search</span>
+    </button>
+    <div class="sel-sep"></div>
+    <button id="sel-ignore-spell">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0z"/><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg>
+        <span data-i18n="ignore_spell">Ignore</span>
+    </button>
+</div>
+
 <!-- Status bar -->
 <div id="status-bar">
-    <span data-i18n="version">ملاحظاتي v1.0</span>
+    <span id="status-version">My Note v1.0</span>
     <span id="word-count"></span>
 </div>
 

@@ -1,7 +1,11 @@
 from app import database, theme
+import os
+import base64
 
 
 class Api:
+    APP_VERSION = "1.0"
+
     def get_all_notes(self):
         return database.get_all_notes()
 
@@ -48,4 +52,39 @@ class Api:
 
     def update_setting(self, key, value):
         database.set_setting(key, value)
+        return True
+
+    def get_version(self):
+        return self.APP_VERSION
+
+    def pick_image(self):
+        try:
+            import tkinter as tk
+            from tkinter import filedialog
+            root = tk.Tk()
+            root.withdraw()
+            root.wm_attributes('-topmost', True)
+            path = filedialog.askopenfilename(
+                title="Select Image",
+                filetypes=[("Images", "*.png *.jpg *.jpeg *.gif *.bmp *.webp")]
+            )
+            root.destroy()
+            if not path:
+                return None
+            ext = os.path.splitext(path)[1].lower().lstrip('.')
+            mime_map = {
+                'jpg': 'image/jpeg', 'jpeg': 'image/jpeg',
+                'png': 'image/png', 'gif': 'image/gif',
+                'bmp': 'image/bmp', 'webp': 'image/webp',
+            }
+            mime = mime_map.get(ext, 'image/png')
+            with open(path, 'rb') as f:
+                data = base64.b64encode(f.read()).decode()
+            return f"data:{mime};base64,{data}"
+        except Exception:
+            return None
+
+    def open_url(self, url):
+        import webbrowser
+        webbrowser.open(url)
         return True
