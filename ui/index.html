@@ -51,22 +51,15 @@
             <span data-i18n="all_notes">All Notes</span>
         </div>
 
-        <!-- Update banner (shown when newer version is available) -->
-        <div id="update-banner" style="display:none">
-            <div id="update-banner-body">
-                <svg viewBox="0 0 16 16" fill="currentColor" class="update-icon">
-                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                </svg>
-                <div id="update-text">
-                    <span id="update-version-label"></span>
-                    <button id="btn-download-update" data-i18n="download_now">Download now</button>
-                </div>
-            </div>
-            <button id="btn-dismiss-update" aria-label="Dismiss">×</button>
+        <!-- Notes list (integrated inside sidebar) -->
+        <div id="notes-panel">
+            <div id="notes-panel-header">All Notes</div>
+            <div id="notes-list"></div>
         </div>
 
         <!-- Language Switcher (always at bottom, always LTR order) -->
         <div id="sidebar-footer">
+            <button id="update-dot" style="display:none"></button>
             <div id="lang-switcher">
                 <button class="lang-btn active" data-lang="ar">ع</button>
                 <button class="lang-btn" data-lang="en">EN</button>
@@ -74,12 +67,6 @@
             </div>
         </div>
     </aside>
-
-    <!-- ═══ NOTES PANEL ═══ -->
-    <div id="notes-panel">
-        <div id="notes-panel-header">All Notes</div>
-        <div id="notes-list"></div>
-    </div>
 
     <!-- ═══ MAIN CONTENT ═══ -->
     <main id="editor-panel">

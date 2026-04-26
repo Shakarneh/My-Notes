@@ -28,10 +28,10 @@ const Editor = (() => {
         if (!dir) return;
         const lineIndex = quill.getIndex(line);
         const lineLength = line.length();
-        quill.formatLine(lineIndex, lineLength, {
-            direction: dir === 'rtl' ? 'rtl' : false,
-            align: dir === 'rtl' ? 'right' : false,
-        }, 'user');
+        const currentFmt = quill.getFormat(lineIndex, lineLength);
+        const newDir = dir === 'rtl' ? 'rtl' : false;
+        if (currentFmt.direction === newDir) return; // already set, skip
+        quill.formatLine(lineIndex, lineLength, { direction: newDir }, 'silent');
     }
 
     function scheduleSave() {
@@ -303,7 +303,56 @@ const Editor = (() => {
 
         // Hide selection toolbar when clicking outside it
         document.addEventListener('mousedown', e => {
-            if (!e.target.closest('#selection-toolbar')) hideSelectionToolbar();
+            if (!e.target.closest('#selection-toolbar') && !e.target.closest('#spell-context-menu')) {
+                hideSelectionToolbar();
+            }
+            if (!e.target.closest('#spell-context-menu')) {
+                document.getElementById('spell-context-menu')?.remove();
+            }
+        });
+
+        // ── Right-click context menu for spell check ──
+        const qlEditorNode = document.querySelector('.ql-editor');
+        qlEditorNode?.addEventListener('contextmenu', e => {
+            e.preventDefault();
+            document.getElementById('spell-context-menu')?.remove();
+
+            const caretRange = document.caretRangeFromPoint?.(e.clientX, e.clientY);
+            if (!caretRange) return;
+            caretRange.expand('word');
+            const word = caretRange.toString().replace(/[\s\n\r]/g, '');
+            if (!word) return;
+
+            // Find word in Quill text for formatting
+            const fullText = quill.getText();
+            const sel = quill.getSelection();
+            const approxIdx = sel ? sel.index : 0;
+            const searchFrom = Math.max(0, approxIdx - word.length * 3);
+            const snippet = fullText.slice(searchFrom, Math.min(fullText.length, searchFrom + word.length * 7));
+            const foundAt = snippet.indexOf(word);
+            const quillIdx = foundAt >= 0 ? searchFrom + foundAt : -1;
+
+            const menu = document.createElement('div');
+            menu.id = 'spell-context-menu';
+            menu.innerHTML = `
+                <div class="ctx-word">"${word}"</div>
+                <button class="ctx-item" id="ctx-ignore-word">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854z"/></svg>
+                    <span data-i18n="ignore_spell">Ignore</span>
+                </button>
+            `;
+            document.body.appendChild(menu);
+
+            const menuW = 190, menuH = 70;
+            menu.style.left = Math.min(e.clientX, window.innerWidth  - menuW - 8) + 'px';
+            menu.style.top  = Math.min(e.clientY, window.innerHeight - menuH - 8) + 'px';
+
+            document.getElementById('ctx-ignore-word')?.addEventListener('click', () => {
+                if (quillIdx >= 0) {
+                    quill.formatText(quillIdx, word.length, 'no-spell', true, 'user');
+                }
+                menu.remove();
+            });
         });
     }
 

@@ -37,6 +37,8 @@ window.addEventListener('pywebviewready', async () => {
         clearTimeout(searchTimer);
         searchTimer = setTimeout(() => Notes.refreshList(searchBox.value), 300);
     });
+    searchBox.addEventListener('mousedown', e => e.stopPropagation());
+    searchBox.addEventListener('click', () => searchBox.focus());
 
     // 9. Nav: All Notes
     document.getElementById('nav-all-notes').addEventListener('click', () => {
@@ -56,25 +58,23 @@ window.addEventListener('pywebviewready', async () => {
         }
     });
 
-    // 11. Update banner (compares hardcoded latest vs current; replace with API call in production)
+    // 11. Update dot (small indicator next to version in header)
     const currentVersion = '1.0';
     const latestVersion  = '1.1';
     const dismissedKey   = 'update-dismissed';
-    const updateBanner   = document.getElementById('update-banner');
+    const updateDot      = document.getElementById('update-dot');
 
     if (latestVersion > currentVersion && localStorage.getItem(dismissedKey) !== latestVersion) {
-        const label = document.getElementById('update-version-label');
-        if (label) label.textContent = `v${latestVersion} ${I18n.t('update_available')}`;
-        if (updateBanner) updateBanner.style.display = 'flex';
+        if (updateDot) {
+            updateDot.textContent = `↑ v${latestVersion} ${I18n.t('update_available')}`;
+            updateDot.style.display = 'block';
+        }
     }
 
-    document.getElementById('btn-dismiss-update')?.addEventListener('click', () => {
-        if (updateBanner) updateBanner.style.display = 'none';
+    updateDot?.addEventListener('click', () => {
+        window.pywebview.api.open_url('https://github.com/Shakarneh/My-Notes/releases/latest');
         localStorage.setItem(dismissedKey, latestVersion);
-    });
-
-    document.getElementById('btn-download-update')?.addEventListener('click', () => {
-        window.pywebview.api.open_url('https://github.com/your-username/notes-app/releases/latest');
+        if (updateDot) updateDot.style.display = 'none';
     });
 
     // 12. Keyboard shortcuts
