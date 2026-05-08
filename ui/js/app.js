@@ -58,24 +58,37 @@ window.addEventListener('pywebviewready', async () => {
         }
     });
 
-    // 11. Update dot (small indicator next to version in header)
-    const currentVersion = '1.0';
-    const latestVersion  = '1.1';
-    const dismissedKey   = 'update-dismissed';
-    const updateDot      = document.getElementById('update-dot');
+    // 11. Render current version everywhere
+    const currentVersion = await window.pywebview.api.get_version();
+    const appVerEl = document.getElementById('app-version');
+    const statusVerEl = document.getElementById('status-version');
+    if (appVerEl) appVerEl.textContent = `v${currentVersion}`;
+    if (statusVerEl) statusVerEl.textContent = `My Note v${currentVersion}`;
 
-    if (latestVersion > currentVersion && localStorage.getItem(dismissedKey) !== latestVersion) {
-        if (updateDot) {
-            updateDot.textContent = `↑ v${latestVersion} ${I18n.t('update_available')}`;
-            updateDot.style.display = 'block';
-        }
-    }
+    // 11b. Real auto-update
+    const updateDot = document.getElementById('update-dot');
+    (async () => {
+        const info = await window.pywebview.api.check_for_update();
+        if (!info || !info.ok || !info.has_update || !updateDot) return;
 
-    updateDot?.addEventListener('click', () => {
-        window.pywebview.api.open_url('https://github.com/Shakarneh/My-Notes/releases/latest');
-        localStorage.setItem(dismissedKey, latestVersion);
-        if (updateDot) updateDot.style.display = 'none';
-    });
+        updateDot.textContent = `↑ v${info.latest} ${I18n.t('update_available')}`;
+        updateDot.style.display = 'block';
+
+        updateDot.addEventListener('click', async () => {
+            if (!confirm(I18n.t('confirm_update', { v: info.latest }))) return;
+            updateDot.textContent = I18n.t('updating');
+            updateDot.disabled = true;
+            updateDot.style.pointerEvents = 'none';
+            const result = await window.pywebview.api.download_and_install_update(info.download_url);
+            if (!result || !result.ok) {
+                alert(I18n.t('update_failed', { e: (result && result.error) || 'unknown' }));
+                updateDot.textContent = `↑ v${info.latest} ${I18n.t('update_available')}`;
+                updateDot.disabled = false;
+                updateDot.style.pointerEvents = '';
+            }
+            // on success, app shuts down — installer takes over
+        });
+    })();
 
     // 12. Keyboard shortcuts
     document.addEventListener('keydown', e => {

@@ -3,9 +3,12 @@ import sys
 
 APP_NAME = "NotesApp"
 APP_TITLE = "My Note"
+APP_VERSION = "1.2.0"
 APP_WIDTH = 1200
 APP_HEIGHT = 800
 TRASH_DAYS = 90
+
+GITHUB_REPO = "Shakarneh/My-Notes"
 
 
 def resource_path(relative_path: str) -> str:

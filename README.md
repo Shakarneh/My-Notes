@@ -26,7 +26,7 @@ A desktop notes app for Windows with Arabic RTL support, rich text editor, and a
 
 ## Installation
 
-1. Download `MyNotes-Setup-v1.1.0.exe` from the [Releases page](https://github.com/Shakarneh/My-Notes/releases)
+1. Download `MyNotes-Setup-v1.2.0.exe` from the [Releases page](https://github.com/Shakarneh/My-Notes/releases)
 2. Run the installer and follow the steps
 3. Launch **My Notes** from the desktop shortcut or Start Menu
 

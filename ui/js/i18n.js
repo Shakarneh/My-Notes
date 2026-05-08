@@ -39,6 +39,9 @@ const I18n = (() => {
             ignore_spell: 'تجاهل',
             update_available: 'متاح',
             download_now: 'تنزيل الآن',
+            confirm_update: 'تحديث إلى الإصدار {v}؟\n\nسيتم تنزيل التحديث وتثبيته تلقائيًا، وسيُغلق التطبيق ثم يُعاد تشغيله.',
+            updating: 'جاري التحديث...',
+            update_failed: 'فشل التحديث: {e}',
             word_count: '{n} كلمة',
         },
         en: {
@@ -80,6 +83,9 @@ const I18n = (() => {
             ignore_spell: 'Ignore',
             update_available: 'available',
             download_now: 'Download now',
+            confirm_update: 'Update to v{v}?\n\nThe update will download and install automatically. The app will close and reopen.',
+            updating: 'Updating...',
+            update_failed: 'Update failed: {e}',
             word_count: '{n} words',
         },
         ru: {
@@ -121,6 +127,9 @@ const I18n = (() => {
             ignore_spell: 'Игнорировать',
             update_available: 'доступна',
             download_now: 'Скачать',
+            confirm_update: 'Обновить до v{v}?\n\nОбновление загрузится и установится автоматически. Приложение закроется и запустится заново.',
+            updating: 'Обновление...',
+            update_failed: 'Ошибка обновления: {e}',
             word_count: '{n} слов',
         },
     };

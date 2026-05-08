@@ -1,10 +1,28 @@
 from app import database, theme
+from app.config import APP_VERSION, GITHUB_REPO
 import os
 import base64
+import json
+import re
+import subprocess
+import sys
+import tempfile
+import threading
+import urllib.request
+import webview
+
+
+def _parse_version(v: str):
+    if not v:
+        return (0, 0, 0)
+    m = re.match(r"v?(\d+)(?:\.(\d+))?(?:\.(\d+))?", v.strip())
+    if not m:
+        return (0, 0, 0)
+    return tuple(int(x or 0) for x in m.groups())
 
 
 class Api:
-    APP_VERSION = "1.0"
+    APP_VERSION = APP_VERSION
 
     def get_all_notes(self):
         return database.get_all_notes()
@@ -56,6 +74,76 @@ class Api:
 
     def get_version(self):
         return self.APP_VERSION
+
+    def check_for_update(self):
+        try:
+            url = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
+            req = urllib.request.Request(url, headers={
+                "User-Agent": "MyNote-Updater",
+                "Accept": "application/vnd.github+json",
+            })
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+            latest = (data.get("tag_name") or "").lstrip("v")
+            release_url = data.get("html_url") or ""
+            assets = data.get("assets") or []
+            exe_asset = next(
+                (a for a in assets if a.get("name", "").lower().endswith(".exe")),
+                None,
+            )
+            download_url = exe_asset.get("browser_download_url") if exe_asset else None
+            has_update = (
+                _parse_version(latest) > _parse_version(self.APP_VERSION)
+                and bool(download_url)
+            )
+            return {
+                "ok": True,
+                "current": self.APP_VERSION,
+                "latest": latest,
+                "has_update": has_update,
+                "download_url": download_url,
+                "release_url": release_url,
+            }
+        except Exception as e:
+            return {"ok": False, "error": str(e)}
+
+    def download_and_install_update(self, url: str):
+        try:
+            if not url or not url.startswith("https://"):
+                return {"ok": False, "error": "Invalid download URL"}
+            tmpdir = tempfile.gettempdir()
+            filename = url.rsplit("/", 1)[-1] or "MyNotes-Setup.exe"
+            installer_path = os.path.join(tmpdir, filename)
+
+            req = urllib.request.Request(url, headers={"User-Agent": "MyNote-Updater"})
+            with urllib.request.urlopen(req, timeout=60) as resp, open(installer_path, "wb") as f:
+                while True:
+                    chunk = resp.read(64 * 1024)
+                    if not chunk:
+                        break
+                    f.write(chunk)
+
+            flags = (
+                getattr(subprocess, "DETACHED_PROCESS", 0)
+                | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+            )
+            subprocess.Popen(
+                [installer_path, "/SILENT", "/CLOSEAPPLICATIONS", "/RESTARTAPPLICATIONS"],
+                creationflags=flags,
+                close_fds=True,
+            )
+
+            def _shutdown():
+                for w in list(webview.windows):
+                    try:
+                        w.destroy()
+                    except Exception:
+                        pass
+
+            threading.Timer(0.5, _shutdown).start()
+            return {"ok": True, "installer_path": installer_path}
+        except Exception as e:
+            return {"ok": False, "error": str(e)}
 
     def pick_image(self):
         try:
