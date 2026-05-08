@@ -1,6 +1,6 @@
 #define AppName      "My Notes"
 #define AppNameAr    "ملاحظاتي"
-#define AppVersion   "1.2.0"
+#define AppVersion   "1.3.0"
 #define AppPublisher "Mohammed"
 #define AppExeName   "NotesApp.exe"
 #define AppURL       "https://github.com/Shakarneh/My-Notes"

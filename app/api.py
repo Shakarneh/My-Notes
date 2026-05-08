@@ -1,5 +1,4 @@
 from app import database, theme
-from app.config import APP_VERSION, GITHUB_REPO
 import os
 import base64
 import json
@@ -10,6 +9,10 @@ import tempfile
 import threading
 import urllib.request
 import webview
+
+
+APP_VERSION = "1.3.0"
+GITHUB_REPO = "Shakarneh/My-Notes"
 
 
 def _parse_version(v: str):
