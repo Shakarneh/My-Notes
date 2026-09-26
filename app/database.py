@@ -1,15 +1,67 @@
+from __future__ import annotations
+
+import re
 import sqlite3
+import unicodedata
+from contextlib import contextmanager
 from app.config import get_db_path, TRASH_DAYS
 
 
-def get_connection() -> sqlite3.Connection:
-    conn = sqlite3.connect(get_db_path())
+# ─── Text normalization (used for search) ────────────────────────────────────
+# Makes search forgiving: case-insensitive for every script (SQLite's LIKE is
+# ASCII-only), ignores Arabic diacritics/tatweel and unifies letter variants.
+
+_AR_DIACRITICS = re.compile(r"[ؐ-ًؚ-ٰٟۖ-ۭـ]")
+_AR_VARIANTS = str.maketrans({
+    "أ": "ا", "إ": "ا", "آ": "ا", "ٱ": "ا",
+    "ى": "ي", "ة": "ه", "ؤ": "و", "ئ": "ي",
+    "ё": "е", "Ё": "е",
+})
+
+
+def normalize(text) -> str:
+    if not text:
+        return ""
+    text = unicodedata.normalize("NFKC", str(text))
+    text = _AR_DIACRITICS.sub("", text)
+    return text.translate(_AR_VARIANTS).casefold()
+
+
+# ─── Connection handling ─────────────────────────────────────────────────────
+
+def _connect() -> sqlite3.Connection:
+    conn = sqlite3.connect(get_db_path(), timeout=10)
     conn.row_factory = sqlite3.Row
+    conn.create_function("norm", 1, normalize, deterministic=True)
     return conn
 
 
+@contextmanager
+def connection():
+    """Open a connection, commit on success, roll back on error, always close.
+
+    (`with sqlite3.connect(...)` only manages the transaction — it never closes
+    the connection, which leaked a handle on every API call.)
+    """
+    conn = _connect()
+    try:
+        yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+
+def _rows(cursor) -> list:
+    return [dict(r) for r in cursor.fetchall()]
+
+
+# ─── Schema ──────────────────────────────────────────────────────────────────
+
 def init_db():
-    with get_connection() as conn:
+    with connection() as conn:
         conn.executescript("""
             CREATE TABLE IF NOT EXISTS notes (
                 id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,126 +91,185 @@ def init_db():
 
 
 def purge_old_trash(conn: sqlite3.Connection = None):
-    close_after = conn is None
     if conn is None:
-        conn = get_connection()
-    try:
-        conn.execute(
-            f"DELETE FROM notes WHERE is_deleted=1 AND deleted_at <= datetime('now', '-{TRASH_DAYS} days')"
-        )
-        conn.commit()
-    finally:
-        if close_after:
-            conn.close()
+        with connection() as c:
+            return purge_old_trash(c)
+    conn.execute(
+        "DELETE FROM notes WHERE is_deleted=1 AND deleted_at <= datetime('now', ?)",
+        (f"-{TRASH_DAYS} days",),
+    )
 
 
-def get_all_notes(conn: sqlite3.Connection = None):
-    close_after = conn is None
-    if conn is None:
-        conn = get_connection()
-    try:
-        rows = conn.execute(
-            """SELECT id, title, content_plain, created_at, updated_at, is_pinned
-               FROM notes WHERE is_deleted=0
-               ORDER BY is_pinned DESC, updated_at DESC"""
-        ).fetchall()
-        return [dict(r) for r in rows]
-    finally:
-        if close_after:
-            conn.close()
+# ─── Notes ───────────────────────────────────────────────────────────────────
+
+_LIST_COLUMNS = "id, title, substr(content_plain, 1, 300) AS content_plain, created_at, updated_at, is_pinned"
+
+
+def get_all_notes():
+    with connection() as conn:
+        return _rows(conn.execute(
+            f"""SELECT {_LIST_COLUMNS}
+                FROM notes WHERE is_deleted=0
+                ORDER BY is_pinned DESC, updated_at DESC, id DESC"""
+        ))
+
+
+def search_notes(query: str):
+    q = normalize(query).strip()
+    if not q:
+        return get_all_notes()
+    escaped = q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    pattern = f"%{escaped}%"
+    with connection() as conn:
+        return _rows(conn.execute(
+            f"""SELECT {_LIST_COLUMNS}
+                FROM notes WHERE is_deleted=0
+                AND (norm(title) LIKE ? ESCAPE '\\' OR norm(content_plain) LIKE ? ESCAPE '\\')
+                ORDER BY is_pinned DESC, updated_at DESC, id DESC""",
+            (pattern, pattern),
+        ))
 
 
 def get_note(note_id: int):
-    with get_connection() as conn:
+    with connection() as conn:
         row = conn.execute(
             "SELECT * FROM notes WHERE id=? AND is_deleted=0", (note_id,)
         ).fetchone()
         return dict(row) if row else None
 
 
-def create_note():
-    with get_connection() as conn:
+def create_note(title: str = "", content: str = "", content_plain: str = "") -> int:
+    with connection() as conn:
         cursor = conn.execute(
-            "INSERT INTO notes (title, content, content_plain) VALUES ('', '', '')"
+            "INSERT INTO notes (title, content, content_plain) VALUES (?, ?, ?)",
+            (title, content, content_plain),
         )
-        conn.commit()
         return cursor.lastrowid
 
 
-def save_note(note_id: int, title: str, content: str, content_plain: str):
-    with get_connection() as conn:
-        conn.execute(
+def save_note(note_id: int, title: str, content: str, content_plain: str) -> bool:
+    with connection() as conn:
+        cursor = conn.execute(
             """UPDATE notes
                SET title=?, content=?, content_plain=?, updated_at=datetime('now')
                WHERE id=? AND is_deleted=0""",
             (title, content, content_plain, note_id),
         )
-        conn.commit()
+        return cursor.rowcount > 0
 
+
+def set_pinned(note_id: int, pinned: bool) -> bool:
+    with connection() as conn:
+        conn.execute(
+            "UPDATE notes SET is_pinned=? WHERE id=? AND is_deleted=0",
+            (1 if pinned else 0, note_id),
+        )
+    return bool(pinned)
+
+
+def duplicate_note(note_id: int, suffix: str = "") -> int | None:
+    with connection() as conn:
+        row = conn.execute(
+            "SELECT title, content, content_plain FROM notes WHERE id=? AND is_deleted=0",
+            (note_id,),
+        ).fetchone()
+        if not row:
+            return None
+        cursor = conn.execute(
+            "INSERT INTO notes (title, content, content_plain) VALUES (?, ?, ?)",
+            ((row["title"] + suffix) if row["title"] else row["title"],
+             row["content"], row["content_plain"]),
+        )
+        return cursor.lastrowid
+
+
+# ─── Trash ───────────────────────────────────────────────────────────────────
 
 def move_to_trash(note_id: int):
-    with get_connection() as conn:
+    with connection() as conn:
         conn.execute(
+            # is_pinned is kept so "Undo" / restore brings the note back exactly as it was
             "UPDATE notes SET is_deleted=1, deleted_at=datetime('now') WHERE id=?",
             (note_id,),
         )
-        conn.commit()
 
 
 def restore_note(note_id: int):
-    with get_connection() as conn:
+    with connection() as conn:
         conn.execute(
             "UPDATE notes SET is_deleted=0, deleted_at=NULL WHERE id=?",
             (note_id,),
         )
-        conn.commit()
 
 
 def delete_permanently(note_id: int):
-    with get_connection() as conn:
+    with connection() as conn:
         conn.execute("DELETE FROM notes WHERE id=? AND is_deleted=1", (note_id,))
-        conn.commit()
 
 
 def empty_trash():
-    with get_connection() as conn:
+    with connection() as conn:
         conn.execute("DELETE FROM notes WHERE is_deleted=1")
-        conn.commit()
 
 
 def get_trash():
-    with get_connection() as conn:
-        rows = conn.execute(
-            """SELECT id, title, content_plain, deleted_at,
+    with connection() as conn:
+        return _rows(conn.execute(
+            """SELECT id, title, substr(content_plain, 1, 300) AS content_plain, deleted_at,
                       CAST(julianday('now') - julianday(deleted_at) AS INTEGER) AS days_in_trash
                FROM notes WHERE is_deleted=1
                ORDER BY deleted_at DESC"""
-        ).fetchall()
-        return [dict(r) for r in rows]
+        ))
 
 
-def search_notes(query: str):
-    with get_connection() as conn:
-        pattern = f"%{query}%"
-        rows = conn.execute(
-            """SELECT id, title, content_plain, updated_at
+def count_trash() -> int:
+    with connection() as conn:
+        return conn.execute("SELECT COUNT(*) FROM notes WHERE is_deleted=1").fetchone()[0]
+
+
+# ─── Backup ──────────────────────────────────────────────────────────────────
+
+def export_notes():
+    with connection() as conn:
+        return _rows(conn.execute(
+            """SELECT title, content, content_plain, created_at, updated_at, is_pinned
                FROM notes WHERE is_deleted=0
-               AND (title LIKE ? OR content_plain LIKE ?)
-               ORDER BY updated_at DESC""",
-            (pattern, pattern),
-        ).fetchall()
-        return [dict(r) for r in rows]
+               ORDER BY created_at, id"""
+        ))
 
 
-def get_setting(key: str) -> str:
-    with get_connection() as conn:
+def import_notes(notes: list) -> int:
+    count = 0
+    with connection() as conn:
+        for n in notes:
+            if not isinstance(n, dict):
+                continue
+            content = n.get("content")
+            content_plain = n.get("content_plain")
+            title = n.get("title")
+            if not all(isinstance(v, str) for v in (content, content_plain, title)):
+                continue
+            created = n.get("created_at") if isinstance(n.get("created_at"), str) else None
+            updated = n.get("updated_at") if isinstance(n.get("updated_at"), str) else None
+            conn.execute(
+                """INSERT INTO notes (title, content, content_plain, created_at, updated_at, is_pinned)
+                   VALUES (?, ?, ?, COALESCE(?, datetime('now')), COALESCE(?, datetime('now')), ?)""",
+                (title, content, content_plain, created, updated, 1 if n.get("is_pinned") else 0),
+            )
+            count += 1
+    return count
+
+
+# ─── Settings ────────────────────────────────────────────────────────────────
+
+def get_setting(key: str) -> str | None:
+    with connection() as conn:
         row = conn.execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
         return row["value"] if row else None
 
 
 def set_setting(key: str, value: str):
-    with get_connection() as conn:
+    with connection() as conn:
         conn.execute(
-            "INSERT OR REPLACE INTO settings(key, value) VALUES (?, ?)", (key, value)
+            "INSERT OR REPLACE INTO settings(key, value) VALUES (?, ?)", (key, str(value))
         )
-        conn.commit()

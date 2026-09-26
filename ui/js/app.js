@@ -1,113 +1,190 @@
-window.addEventListener('pywebviewready', async () => {
-    // 1. Apply theme
-    await Theme.init();
+const App = (() => {
+    const $ = id => document.getElementById(id);
 
-    // 2. Apply language (must run before refreshList so translated strings are ready)
-    await I18n.init();
+    function setActiveNav(id) {
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        if (id) $(id)?.classList.add('active');
+    }
 
-    // 3. Load notes list
-    await Notes.refreshList();
-
-    // 4. Load trash badge on the header icon
-    await Trash.refreshBadge();
-
-    // 5. Init editor
-    Editor.init();
-
-    // 6. New note button — open blank editor immediately; note is created in DB on first keystroke
-    document.getElementById('btn-new-note').addEventListener('click', () => {
-        Editor.openBlankNote();
+    function showNotesView() {
         setActiveNav('nav-all-notes');
-        document.getElementById('notes-panel').style.display = 'flex';
-        document.getElementById('btn-trash-icon')?.classList.remove('active');
-    });
+        $('notes-panel').style.display = 'flex';
+        $('btn-trash-icon')?.classList.remove('active');
+    }
 
-    // 7. Trash icon button in header
-    document.getElementById('btn-trash-icon')?.addEventListener('click', () => {
+    async function showTrashView() {
+        await Editor.flushSave();
+        Editor.clear();
+        Notes.setActive(null);
         setActiveNav(null);
-        document.getElementById('notes-panel').style.display = 'none';
-        document.getElementById('btn-trash-icon')?.classList.add('active');
-        Trash.show();
-    });
+        $('notes-panel').style.display = 'none';
+        $('btn-trash-icon')?.classList.add('active');
+        await Trash.show();
+        Editor.updateStats();
+    }
 
-    // 8. Search with debounce
-    const searchBox = document.getElementById('search-box');
-    let searchTimer = null;
-    searchBox.addEventListener('input', () => {
-        clearTimeout(searchTimer);
-        searchTimer = setTimeout(() => Notes.refreshList(searchBox.value), 300);
-    });
-    searchBox.addEventListener('mousedown', e => e.stopPropagation());
-    searchBox.addEventListener('click', () => searchBox.focus());
+    function newNote(block = null) {
+        if (document.body.classList.contains('focus-mode')) setFocusMode(false);
+        showNotesView();
+        Notes.setActive(null);
+        Editor.openBlankNote({ block });
+    }
 
-    // 9. Nav: All Notes
-    document.getElementById('nav-all-notes').addEventListener('click', () => {
-        setActiveNav('nav-all-notes');
-        document.getElementById('notes-panel').style.display = 'flex';
-        document.getElementById('btn-trash-icon')?.classList.remove('active');
-        Notes.showNoNoteSelected();
-        Notes.refreshList(searchBox.value);
-    });
+    function setFocusMode(on) {
+        document.body.classList.toggle('focus-mode', on);
+        $('btn-focus')?.classList.toggle('ql-active', on);
+        window.pywebview.api.update_setting('focus_mode', on ? '1' : '0');
+    }
 
-    // 10. Empty trash
-    document.getElementById('btn-empty-trash').addEventListener('click', async () => {
-        if (confirm(I18n.t('confirm_empty_trash'))) {
-            await window.pywebview.api.empty_trash();
-            await Trash.refresh();
-            await Trash.refreshBadge();
+    async function runBackup() {
+        const res = await window.pywebview.api.backup_notes();
+        if (res?.ok) UI.toast(I18n.t('backup_done', { n: res.count }), { kind: 'success' });
+        else if (res && !res.cancelled) UI.toast(I18n.t('error_generic', { e: res.error || '' }), { kind: 'error' });
+    }
+
+    async function runRestore() {
+        const res = await window.pywebview.api.restore_backup();
+        if (res?.ok) {
+            UI.toast(I18n.t('restore_done', { n: res.count }), { kind: 'success' });
+            await Notes.refreshList();
+        } else if (res?.error === 'invalid_backup') {
+            UI.toast(I18n.t('restore_invalid'), { kind: 'error' });
+        } else if (res && !res.cancelled) {
+            UI.toast(I18n.t('error_generic', { e: res.error || '' }), { kind: 'error' });
         }
-    });
+    }
 
-    // 11. Render current version everywhere
-    const currentVersion = await window.pywebview.api.get_version();
-    const appVerEl = document.getElementById('app-version');
-    const statusVerEl = document.getElementById('status-version');
-    if (appVerEl) appVerEl.textContent = `v${currentVersion}`;
-    if (statusVerEl) statusVerEl.textContent = `My Note v${currentVersion}`;
+    async function start() {
+        const settings = await window.pywebview.api.get_settings();
 
-    // 11b. Real auto-update
-    const updateDot = document.getElementById('update-dot');
-    (async () => {
-        const info = await window.pywebview.api.check_for_update();
-        if (!info || !info.ok || !info.has_update || !updateDot) return;
+        await I18n.init(settings);
+        await Theme.init(settings);
+        Settings.init(settings);
+        Trash.init(settings);
+        Editor.init();
+        Home.init();
+        await Notes.refreshList();
+        Home.render();
+        await Trash.refreshBadge();
+        if (settings.focus_mode) {
+            document.body.classList.add('focus-mode');
+            $('btn-focus')?.classList.add('ql-active');
+        }
 
-        updateDot.textContent = `↑ v${info.latest} ${I18n.t('update_available')}`;
-        updateDot.style.display = 'block';
-
-        updateDot.addEventListener('click', async () => {
-            if (!confirm(I18n.t('confirm_update', { v: info.latest }))) return;
-            updateDot.textContent = I18n.t('updating');
-            updateDot.disabled = true;
-            updateDot.style.pointerEvents = 'none';
-            const result = await window.pywebview.api.download_and_install_update(info.download_url);
-            if (!result || !result.ok) {
-                alert(I18n.t('update_failed', { e: (result && result.error) || 'unknown' }));
-                updateDot.textContent = `↑ v${info.latest} ${I18n.t('update_available')}`;
-                updateDot.disabled = false;
-                updateDot.style.pointerEvents = '';
-            }
-            // on success, app shuts down — installer takes over
+        // ── Header / nav ──
+        $('btn-new-note').addEventListener('click', () => newNote());
+        $('btn-trash-icon')?.addEventListener('click', showTrashView);
+        $('nav-all-notes').addEventListener('click', async () => {
+            if (!Trash.isVisible()) return;
+            showNotesView();
+            Notes.showNoNoteSelected();
         });
-    })();
+        $('btn-empty-trash').addEventListener('click', Trash.emptyAll);
 
-    // 12. Keyboard shortcuts
-    document.addEventListener('keydown', e => {
-        if (e.ctrlKey && e.key === 'n') {
-            e.preventDefault();
-            Editor.openBlankNote();
-            setActiveNav('nav-all-notes');
-            document.getElementById('notes-panel').style.display = 'flex';
-            document.getElementById('btn-trash-icon')?.classList.remove('active');
-        }
-        if (e.ctrlKey && e.key === 'f') {
-            e.preventDefault();
+        // ── Footer tools ──
+        $('btn-focus')?.addEventListener('click', () => setFocusMode(!document.body.classList.contains('focus-mode')));
+
+        // ── Search ──
+        const searchBox = $('search-box');
+        const searchClear = $('search-clear');
+        let searchTimer = null;
+        const applySearch = () => {
+            searchClear.style.display = searchBox.value ? 'flex' : 'none';
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                if (Trash.isVisible() && searchBox.value) {
+                    showNotesView();
+                    Notes.showNoNoteSelected();
+                }
+                Notes.setQuery(searchBox.value);
+            }, 200);
+        };
+        searchBox.addEventListener('input', applySearch);
+        searchBox.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                searchBox.value = '';
+                applySearch();
+                searchBox.blur();
+            } else if (e.key === 'Enter' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                document.querySelector('.note-card')?.focus();
+            }
+        });
+        searchClear.addEventListener('click', () => {
+            searchBox.value = '';
+            applySearch();
             searchBox.focus();
-            searchBox.select();
-        }
+        });
+
+        // Arrow-key navigation inside the notes list
+        $('notes-list').addEventListener('keydown', e => {
+            if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+            const cards = [...document.querySelectorAll('.note-card')];
+            const i = cards.indexOf(document.activeElement);
+            if (i < 0) return;
+            e.preventDefault();
+            const next = cards[i + (e.key === 'ArrowDown' ? 1 : -1)];
+            if (next) next.focus();
+            else if (e.key === 'ArrowUp') searchBox.focus();
+        });
+
+        // ── Language change: re-render everything that contains text ──
+        document.addEventListener('languagechange', async () => {
+            Theme.paint();
+            Editor.updateStats();
+            await Notes.refreshList();
+            if (Trash.isVisible()) await Trash.refresh();
+        });
+
+        // ── Version ──
+        const version = await window.pywebview.api.get_version();
+        $('app-version').textContent = `v${version}`;
+        $('status-version').textContent = `My Note v${version}`;
+
+        // ── Keyboard shortcuts (use e.code so they work on Arabic/Russian layouts) ──
+        document.addEventListener('keydown', e => {
+            const mod = e.ctrlKey || e.metaKey;
+            if (mod && !e.shiftKey && e.code === 'KeyN') {
+                e.preventDefault();
+                newNote();
+            } else if (mod && e.code === 'KeyF') {
+                e.preventDefault();
+                if (document.body.classList.contains('focus-mode')) setFocusMode(false);
+                searchBox.focus();
+                searchBox.select();
+            } else if (mod && e.code === 'KeyS') {
+                e.preventDefault();
+                Editor.flushSave();
+            } else if (mod && e.code === 'KeyH') {
+                if (Editor.isVisible()) {
+                    e.preventDefault();
+                    Find.open(true);
+                }
+            } else if (mod && e.code === 'Backslash') {
+                e.preventDefault();
+                setFocusMode(!document.body.classList.contains('focus-mode'));
+            } else if (e.key === 'Escape' && document.body.classList.contains('focus-mode')
+                       && !document.getElementById('spell-context-menu') && !Blocks.isOpen()
+                       && !Find.isOpen() && !document.getElementById('drawing-overlay')
+                       && !WhatsNew.isOpen() && !document.getElementById('settings-modal')) {
+                setFocusMode(false);
+            }
+        });
+
+        // Relative times ("5m ago") stay fresh
+        setInterval(() => {
+            if (!document.querySelector('.note-card:focus')) Notes.refreshList();
+        }, 60 * 1000);
+
+        Updater.init();
+    }
+
+    return { start, showNotesView, showTrashView, newNote, runBackup, runRestore };
+})();
+
+window.addEventListener('pywebviewready', () => {
+    App.start().catch(err => {
+        console.error(err);
+        UI.toast(I18n.t('error_generic', { e: err.message || err }), { kind: 'error', duration: 8000 });
     });
 });
-
-function setActiveNav(id) {
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    if (id) document.getElementById(id)?.classList.add('active');
-}

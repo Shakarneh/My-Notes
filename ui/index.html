@@ -4,9 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Note</title>
-    <link id="theme-stylesheet" rel="stylesheet" href="css/theme-dark.css">
+    <link rel="icon" href="assets/icon.ico">
+    <!-- Everything is bundled locally: the app must work with no internet connection. -->
+    <link rel="stylesheet" href="vendor/fonts/fonts.css">
+    <link rel="stylesheet" href="vendor/quill/quill.snow.css">
+    <link rel="stylesheet" href="css/theme-dark.css">
+    <link rel="stylesheet" href="css/theme-light.css">
     <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">
+    <script>
+        // Pick a theme before first paint (the backend refines it once ready).
+        (function () {
+            var h = new Date().getHours();
+            document.documentElement.className = (h < 7 || h >= 19) ? 'theme-dark' : 'theme-light';
+        })();
+    </script>
 </head>
 <body>
 <div id="app">
@@ -15,36 +26,37 @@
     <aside id="sidebar">
         <div id="sidebar-header">
             <div id="app-brand">
-                <svg id="app-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                     stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                    <line x1="16" y1="13" x2="8" y2="13"/>
-                    <line x1="16" y1="17" x2="8" y2="17"/>
-                    <polyline points="10 9 9 9 8 9"/>
-                </svg>
+                <img id="app-icon" src="assets/logo.svg" alt="">
                 <span id="app-title">My Note</span>
                 <span id="app-version"></span>
             </div>
             <div id="header-actions">
-                <button id="btn-trash-icon" title="Trash">
+                <button id="btn-trash-icon" class="header-btn" data-i18n-title="trash" title="Trash">
                     <svg viewBox="0 0 16 16" fill="currentColor">
                         <path d="M5.5 1a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H6a.5.5 0 0 1-.5-.5ZM3 3h10v1H3V3Zm1 1.5v8A1.5 1.5 0 0 0 5.5 14h5A1.5 1.5 0 0 0 12 12.5v-8H4Zm2 1.5a.5.5 0 0 1 1 0v6a.5.5 0 0 1-1 0V6Zm3 0a.5.5 0 0 1 1 0v6a.5.5 0 0 1-1 0V6Z"/>
                     </svg>
                     <span class="trash-count-badge" id="trash-badge" style="display:none">0</span>
                 </button>
-                <button id="btn-new-note"
+                <button id="btn-new-note" class="header-btn"
                         data-i18n-title="new_note_tooltip"
-                        title="New Note (Ctrl+N)">+</button>
+                        title="New Note (Ctrl+N)">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 8 2z"/></svg>
+                </button>
             </div>
         </div>
 
-        <input id="search-box" type="text"
-               placeholder="Search... (Ctrl+F)"
-               data-i18n-ph="search_placeholder"
-               autocomplete="off">
+        <div id="search-wrap">
+            <svg class="search-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
+            <input id="search-box" type="text"
+                   placeholder="Search... (Ctrl+F)"
+                   data-i18n-ph="search_placeholder"
+                   autocomplete="off" spellcheck="false">
+            <button id="search-clear" style="display:none" data-i18n-title="clear_search" title="Clear">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+            </button>
+        </div>
 
-        <div class="nav-item active" id="nav-all-notes">
+        <div class="nav-item active" id="nav-all-notes" tabindex="0">
             <svg viewBox="0 0 16 16" fill="currentColor">
                 <path d="M4 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4zm1 3h6v1H5V5zm0 2.5h6v1H5v-1zm0 2.5h4v1H5v-1z"/>
             </svg>
@@ -57,13 +69,29 @@
             <div id="notes-list"></div>
         </div>
 
-        <!-- Language Switcher (always at bottom, always LTR order) -->
+        <!-- Footer: update notice, tools, language -->
         <div id="sidebar-footer">
-            <button id="update-dot" style="display:none"></button>
-            <div id="lang-switcher">
-                <button class="lang-btn active" data-lang="ar">ع</button>
-                <button class="lang-btn" data-lang="en">EN</button>
-                <button class="lang-btn" data-lang="ru">РУ</button>
+            <div id="update-card" style="display:none"></div>
+            <div id="accent-popover"></div>
+            <div id="language-popover"></div>
+            <div id="footer-row">
+                <div id="footer-tools">
+                    <button class="footer-btn" id="btn-settings" data-i18n-title="settings_tip" title="Settings (Ctrl+,)">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/><path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/></svg>
+                    </button>
+                    <button class="footer-btn" id="btn-theme" data-i18n-title="theme_auto" title="Theme">
+                        <svg class="ic-auto" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 0 8 1v14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z"/></svg>
+                        <svg class="ic-light" viewBox="0 0 16 16" fill="currentColor"><path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/></svg>
+                        <svg class="ic-dark" viewBox="0 0 16 16" fill="currentColor"><path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/></svg>
+                    </button>
+                    <button class="footer-btn" id="btn-accent" data-i18n-title="accent_color" title="Accent colour">
+                        <span class="accent-dot"></span>
+                    </button>
+                </div>
+                <button id="btn-language" data-i18n-title="set_language" title="Language">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+                    <span class="lang-current"></span>
+                </button>
             </div>
         </div>
     </aside>
@@ -71,37 +99,94 @@
     <!-- ═══ MAIN CONTENT ═══ -->
     <main id="editor-panel">
 
-        <!-- No note selected -->
+        <!-- Home (no note selected) -->
         <div id="no-note-selected">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-            </svg>
-            <p data-i18n="no_note_msg">Select a note or create a new one</p>
+            <div id="home">
+                <div id="home-date"></div>
+                <h1 id="home-greeting"></h1>
+                <p id="home-sub" data-i18n="home_sub">What's on your mind today?</p>
+
+                <div id="home-quick">
+                    <button class="quick-tile" data-quick="note">
+                        <span class="quick-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+                        <span class="quick-label" data-i18n="quick_note">Note</span>
+                        <kbd>Ctrl+N</kbd>
+                    </button>
+                    <button class="quick-tile" data-quick="todo">
+                        <span class="quick-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+                        <span class="quick-label" data-i18n="quick_todo">Checklist</span>
+                    </button>
+                    <button class="quick-tile" data-quick="table">
+                        <span class="quick-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16M15 4v16"/></svg></span>
+                        <span class="quick-label" data-i18n="quick_table">Table</span>
+                    </button>
+                    <button class="quick-tile" data-quick="drawing">
+                        <span class="quick-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg></span>
+                        <span class="quick-label" data-i18n="quick_draw">Drawing</span>
+                    </button>
+                </div>
+
+                <div id="home-recent-wrap">
+                    <div class="home-section-title">
+                        <span data-i18n="recent">Recent</span>
+                        <span id="home-stats"></span>
+                    </div>
+                    <div id="home-recent"></div>
+                </div>
+
+                <div class="shortcut-hints">
+                    <span><kbd>/</kbd> <span data-i18n="hint_blocks">Blocks</span></span>
+                    <span><kbd>Ctrl</kbd>+<kbd>F</kbd> <span data-i18n="hint_search">Search</span></span>
+                    <span><kbd>Ctrl</kbd>+<kbd>H</kbd> <span data-i18n="hint_replace">Replace</span></span>
+                    <span><kbd>Ctrl</kbd>+<kbd>\</kbd> <span data-i18n="hint_focus">Focus</span></span>
+                </div>
+            </div>
         </div>
 
         <!-- Editor -->
         <div id="editor-content">
             <!-- Toolbar -->
             <div id="editor-toolbar">
-                <button class="toolbar-btn" data-format="bold" title="Bold (Ctrl+B)"><b>B</b></button>
-                <button class="toolbar-btn" data-format="italic" title="Italic (Ctrl+I)"><i>I</i></button>
-                <button class="toolbar-btn" data-format="underline" title="Underline (Ctrl+U)"><u>U</u></button>
-                <button class="toolbar-btn" data-format="strike" title="Strikethrough">
+                <button class="toolbar-btn" id="btn-undo" data-i18n-title="tb_undo" title="Undo (Ctrl+Z)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                </button>
+                <button class="toolbar-btn" id="btn-redo" data-i18n-title="tb_redo" title="Redo (Ctrl+Y)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                </button>
+
+                <div class="toolbar-divider"></div>
+
+                <button class="toolbar-btn text-btn" data-format="header" data-value="1" data-i18n-title="tb_h1" title="Heading 1">H1</button>
+                <button class="toolbar-btn text-btn" data-format="header" data-value="2" data-i18n-title="tb_h2" title="Heading 2">H2</button>
+
+                <div class="toolbar-divider"></div>
+
+                <button class="toolbar-btn" data-format="bold" data-i18n-title="tb_bold" title="Bold (Ctrl+B)"><b>B</b></button>
+                <button class="toolbar-btn" data-format="italic" data-i18n-title="tb_italic" title="Italic (Ctrl+I)"><i>I</i></button>
+                <button class="toolbar-btn" data-format="underline" data-i18n-title="tb_underline" title="Underline (Ctrl+U)"><u>U</u></button>
+                <button class="toolbar-btn" data-format="strike" data-i18n-title="tb_strike" title="Strikethrough">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.527 8.5H3.5a.5.5 0 0 1 0-1h9a.5.5 0 0 1 0 1h-4.473zM7 5.5a2 2 0 0 0-2 2H4a3 3 0 0 1 6 0H9a2 2 0 0 0-2-2zm1 5h1a2 2 0 0 1-4 0h1a1 1 0 0 0 2 0z"/></svg>
                 </button>
 
                 <!-- Text color -->
-                <button class="toolbar-btn color-btn" id="btn-text-color" title="Text Color">
+                <button class="toolbar-btn color-btn" id="btn-text-color" data-i18n-title="tb_color" title="Text Color">
                     <span class="color-btn-label">A</span>
                     <span class="color-btn-bar" id="color-btn-bar"></span>
                 </button>
-                <input type="color" id="color-picker-input" value="#e74c3c"
-                       style="visibility:hidden;position:absolute;width:0;height:0">
+                <input type="color" id="color-picker-input" value="#e74c3c" tabindex="-1" aria-hidden="true">
+
+                <!-- Highlight -->
+                <button class="toolbar-btn" id="btn-highlight" data-i18n-title="tb_highlight" title="Highlight">
+                    <span class="highlight-label">ab</span>
+                </button>
+
+                <button class="toolbar-btn" id="btn-clear-format" data-i18n-title="tb_clear" title="Clear formatting">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.086 2.207a2 2 0 0 1 2.828 0l3.879 3.879a2 2 0 0 1 0 2.828l-5.5 5.5A2 2 0 0 1 7.879 15H5.12a2 2 0 0 1-1.414-.586l-2.5-2.5a2 2 0 0 1 0-2.828l6.879-6.879zm2.121.707a1 1 0 0 0-1.414 0L4.16 7.547l5.293 5.293 4.633-4.633a1 1 0 0 0 0-1.414l-3.879-3.879zM8.746 13.547 3.453 8.254 1.914 9.793a1 1 0 0 0 0 1.414l2.5 2.5a1 1 0 0 0 .707.293H7.88a1 1 0 0 0 .707-.293l.16-.16z"/></svg>
+                </button>
 
                 <div class="toolbar-divider"></div>
 
-                <select class="toolbar-select" id="font-size-select">
+                <select class="toolbar-select" id="font-size-select" data-i18n-title="tb_size" title="Font size">
                     <option value="">—</option>
                     <option value="12px">12</option>
                     <option value="14px">14</option>
@@ -113,7 +198,7 @@
                     <option value="32px">32</option>
                 </select>
 
-                <select class="toolbar-select" id="font-family-select">
+                <select class="toolbar-select" id="font-family-select" data-i18n-title="tb_font" title="Font">
                     <option value="">Aa</option>
                     <option value="tajawal">تجوال</option>
                     <option value="ibmplexsans">IBM Plex</option>
@@ -123,50 +208,111 @@
                 <div class="toolbar-divider"></div>
 
                 <!-- Alignment: right / center / left  (left = remove align in Quill) -->
-                <button class="toolbar-btn" data-align="right" title="Align Right">
+                <button class="toolbar-btn" data-align="right" data-i18n-title="tb_align_right" title="Align Right">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 12.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-4-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm4-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-4-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg>
                 </button>
-                <button class="toolbar-btn" data-align="center" title="Center">
+                <button class="toolbar-btn" data-align="center" data-i18n-title="tb_align_center" title="Center">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 12.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg>
                 </button>
-                <button class="toolbar-btn" data-align="left" title="Align Left">
+                <button class="toolbar-btn" data-align="left" data-i18n-title="tb_align_left" title="Align Left">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 12.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg>
                 </button>
 
                 <div class="toolbar-divider"></div>
 
-                <button class="toolbar-btn" data-format="list" data-value="ordered" title="Ordered List">
+                <button class="toolbar-btn" data-format="list" data-value="ordered" data-i18n-title="tb_ordered" title="Numbered List">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 5 3.5zM1.713 11.865v-.474H2c.217 0 .363-.137.363-.317 0-.185-.158-.31-.361-.31-.223 0-.367.152-.373.31h-.59c.016-.467.373-.787.986-.787.588 0 .954.291.954.756 0 .312-.19.551-.471.639v.022c.35.069.569.31.569.665 0 .557-.396.886-1.018.886-.63 0-1.008-.345-1.005-.868h.596c.01.186.165.316.409.316.25 0 .384-.139.384-.342 0-.195-.155-.325-.415-.325h-.3zm-.004-4.699h-.604v-.035c0-.408.295-.844.958-.844.583 0 .96.326.96.756 0 .389-.257.617-.476.848l-.537.572v.03h1.054V9H1.143v-.395l.957-.99c.138-.142.293-.304.293-.508 0-.18-.147-.32-.342-.32a.33.33 0 0 0-.342.338v.041zM2.564 5h-.635V2.924h-.031l-.598.42v-.567l.629-.443h.635V5z"/></svg>
                 </button>
-                <button class="toolbar-btn" data-format="list" data-value="bullet" title="Bullet List">
+                <button class="toolbar-btn" data-format="list" data-value="bullet" data-i18n-title="tb_bullet" title="Bullet List">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 5 3.5zM2 3.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm0 4a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm0 4a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z"/></svg>
                 </button>
-                <button class="toolbar-btn" data-format="list" data-value="checked" title="Checklist">
+                <button class="toolbar-btn" data-format="list" data-value="unchecked" data-i18n-title="tb_checklist" title="Checklist">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zm-2.5 7.5-3.5 3.5-1.5-1.5-.7.7 2.2 2.2 4.2-4.2-.7-.7z"/></svg>
                 </button>
 
                 <div class="toolbar-divider"></div>
 
-                <button class="toolbar-btn" data-format="blockquote" title="Quote">
+                <button class="toolbar-btn" data-format="blockquote" data-i18n-title="tb_quote" title="Quote">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M12 12a1 1 0 0 0 1-1V8.558a1 1 0 0 0-1-1h-1.388q0-.527.062-1.054.093-.558.31-.992t.559-.683q.34-.279.868-.279V3q-.868 0-1.52.372a3.3 3.3 0 0 0-1.085.992 4.9 4.9 0 0 0-.62 1.458A7.7 7.7 0 0 0 9 7.558V11a1 1 0 0 0 1 1zm-6 0a1 1 0 0 0 1-1V8.558a1 1 0 0 0-1-1H4.612q0-.527.062-1.054.094-.558.31-.992.217-.434.559-.683.34-.279.868-.279V3q-.868 0-1.52.372a3.3 3.3 0 0 0-1.085.992 4.9 4.9 0 0 0-.62 1.458A7.7 7.7 0 0 0 3 7.558V11a1 1 0 0 0 1 1z"/></svg>
                 </button>
-                <button class="toolbar-btn" data-format="code-block" title="Code">
+                <button class="toolbar-btn" data-format="code-block" data-i18n-title="tb_code" title="Code">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5.854 4.854a.5.5 0 1 0-.708-.708l-3.5 3.5a.5.5 0 0 0 0 .708l3.5 3.5a.5.5 0 0 0 .708-.708L2.707 8l3.147-3.146zm4.292 0a.5.5 0 0 1 .708-.708l3.5 3.5a.5.5 0 0 1 0 .708l-3.5 3.5a.5.5 0 0 1-.708-.708L13.293 8l-3.147-3.146z"/></svg>
                 </button>
 
                 <!-- Insert image -->
-                <button class="toolbar-btn" id="btn-insert-image" title="Insert Image">
+                <button class="toolbar-btn" id="btn-insert-image" data-i18n-title="tb_image" title="Insert Image">
                     <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>
                 </button>
+                <button class="toolbar-btn" id="btn-insert-table" data-i18n-title="tb_table" title="Insert table">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><path d="M1.5 6.2h13M1.5 9.8h13M6 2.5v11M10.5 2.5v11"/></svg>
+                </button>
+                <button class="toolbar-btn" id="btn-draw" data-i18n-title="tb_draw" title="Draw">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M12.15.85a.5.5 0 0 1 .7 0l2.3 2.3a.5.5 0 0 1 0 .7l-9 9a.5.5 0 0 1-.23.13l-3.5 1a.5.5 0 0 1-.62-.62l1-3.5a.5.5 0 0 1 .13-.23l9-9zM11.2 3.2 12.8 4.8 14.1 3.5 12.5 1.9z"/></svg>
+                </button>
 
-                <div style="flex:1"></div>
+                <div class="toolbar-divider"></div>
+
+                <button class="toolbar-btn" id="btn-find" data-i18n-title="find_replace" title="Find &amp; replace (Ctrl+H)">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
+                </button>
+
+            </div>
+
+            <!-- Find & replace (Ctrl+H) -->
+            <div id="find-bar">
+                <div class="find-row">
+                    <button class="find-btn" id="find-toggle-replace" title="Replace">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>
+                    </button>
+                    <input id="find-input" type="text" data-i18n-ph="find_ph" placeholder="Find in note" spellcheck="false" dir="auto">
+                    <span id="find-count"></span>
+                    <button class="find-btn" id="find-prev" title="Shift+Enter">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"/></svg>
+                    </button>
+                    <button class="find-btn" id="find-next" title="Enter">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>
+                    </button>
+                    <button class="find-btn" id="find-close" title="Esc">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+                    </button>
+                </div>
+                <div class="find-row replace-row">
+                    <span class="find-indent"></span>
+                    <input id="replace-input" type="text" data-i18n-ph="replace_ph" placeholder="Replace with" spellcheck="false" dir="auto">
+                    <button class="find-text-btn" id="replace-one" data-i18n="replace_one">Replace</button>
+                    <button class="find-text-btn" id="replace-all" data-i18n="replace_all">Replace all</button>
+                </div>
+            </div>
+
+            <!-- Note header: last edited + save state + note actions -->
+            <div id="note-meta">
+                <span id="note-date"></span>
+                <div class="toolbar-spacer"></div>
                 <span id="save-indicator"></span>
+                <button class="meta-btn" id="btn-focus" data-i18n-title="focus_mode" title="Focus mode (Ctrl+\)">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/></svg>
+                </button>
+                <button class="meta-btn" id="btn-pin-note" data-i18n-title="pin" title="Pin">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189A5.921 5.921 0 0 1 5 6.708V2.277a2.77 2.77 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354z"/></svg>
+                </button>
+                <button class="meta-btn" id="btn-export-note" data-i18n-title="export_note" title="Export">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+                </button>
+                <button class="meta-btn" id="btn-email-note" data-i18n-title="email_note" title="E-mail">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2zm13 2.383-4.708 2.825L15 11.105V5.383zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741zM1 11.105l4.708-2.897L1 5.383v5.722z"/></svg>
+                </button>
+                <button class="meta-btn" id="btn-print-note" data-i18n-title="print_note" title="Print">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/><path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/></svg>
+                </button>
+                <button class="meta-btn danger" id="btn-delete-note" data-i18n-title="delete_note" title="Delete">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 1a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H6a.5.5 0 0 1-.5-.5ZM3 3h10v1H3V3Zm1 1.5v8A1.5 1.5 0 0 0 5.5 14h5A1.5 1.5 0 0 0 12 12.5v-8H4Zm2 1.5a.5.5 0 0 1 1 0v6a.5.5 0 0 1-1 0V6Zm3 0a.5.5 0 0 1 1 0v6a.5.5 0 0 1-1 0V6Z"/></svg>
+                </button>
             </div>
 
             <!-- Title -->
             <input id="note-title-input" type="text"
                    placeholder="Note title..."
-                   data-i18n-ph="title_placeholder">
+                   data-i18n-ph="title_placeholder" dir="auto">
             <div class="title-divider"></div>
 
             <!-- Editor -->
@@ -178,13 +324,23 @@
         <!-- Trash Panel -->
         <div id="trash-panel">
             <div id="trash-header">
-                <h2 data-i18n="trash_title">Trash</h2>
+                <div>
+                    <h2 data-i18n="trash_title">Trash</h2>
+                    <p id="trash-subtitle"></p>
+                </div>
                 <button id="btn-empty-trash" data-i18n="empty_trash_btn">Empty Trash</button>
             </div>
             <div id="trash-list"></div>
         </div>
 
     </main>
+</div>
+
+<!-- Status bar -->
+<div id="status-bar">
+    <span id="status-version"></span>
+    <span id="status-credit">Made with <span class="heart">♥</span> by <b>Mohammed Shakarneh</b></span>
+    <span id="word-count"></span>
 </div>
 
 <!-- Floating selection toolbar -->
@@ -199,11 +355,11 @@
     </button>
     <div class="sel-sep"></div>
     <button id="sel-translate">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.545 6.714 4.11 8H3l1.862-5h1.284L8 8H6.833l-.435-1.286H4.545zm1.634-.736L5.5 3.956h-.049l-.679 2.022H6.18z"/><path d="M0 2a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v3h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-3H2a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H2zm7.138 9.995c.193.301.402.583.63.846-.748.575-1.673 1.001-2.768 1.292.178.217.457.635.457.635-.936.223-1.592.232-2.253.159.048.184.086.371.112.559 3.078-.081 5.95-1.055 7.124-2.882a.961.961 0 0 0-.085-.032 15.308 15.308 0 0 1-.043-2.573C12.938 7.67 14 8.83 14 10a2 2 0 0 1-2 2 2 2 0 0 1-2-2c0-.794.5-1.5 1.138-1.879.027.08.15.293.15.293L9.138 10.995z"/></svg>
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.545 6.714 4.11 8H3l1.862-5h1.284L8 8H6.833l-.435-1.286H4.545zm1.634-.736L5.5 3.956h-.049l-.679 2.022H6.18z"/><path d="M0 2a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v3h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-3H2a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H2zm7.138 9.995c.193.301.402.583.63.846-.748.575-1.673 1.001-2.768 1.292.178.217.457.635.457.635-.936.223-1.592.232-2.253.159.048.184.086.371.112.559 3.078-.081 5.950-1.055 7.124-2.882a.961.961 0 0 0-.085-.032 15.308 15.308 0 0 1-.043-2.573C12.938 7.670 14 8.830 14 10a2 2 0 0 1-2 2 2 2 0 0 1-2-2c0-.794.5-1.5 1.138-1.879.027.08.150.293.150.293L9.138 10.995z"/></svg>
         <span data-i18n="translate">Translate</span>
     </button>
     <button id="sel-search">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.850 3.850a1 1 0 0 0 1.415-1.414l-3.850-3.850a1.007 1.007 0 0 0-.115-.099zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
         <span data-i18n="search_web">Search</span>
     </button>
     <div class="sel-sep"></div>
@@ -213,29 +369,44 @@
     </button>
 </div>
 
-<!-- Status bar -->
-<div id="status-bar">
-    <span id="status-version"></span>
-    <span id="word-count"></span>
+<!-- "/" block menu -->
+<div id="slash-menu" style="display:none"></div>
+
+<!-- Table toolbar (shown while the cursor is in a table) -->
+<div id="table-toolbar" style="display:none">
+    <button data-tbl="row-above" data-i18n="tbl_row_above">Row above</button>
+    <button data-tbl="row-below" data-i18n="tbl_row_below">Row below</button>
+    <span class="sel-sep"></span>
+    <button data-tbl="col-before" data-i18n="tbl_col_before">Column before</button>
+    <button data-tbl="col-after" data-i18n="tbl_col_after">Column after</button>
+    <span class="sel-sep"></span>
+    <button data-tbl="del-row" class="danger" data-i18n="tbl_del_row">Delete row</button>
+    <button data-tbl="del-col" class="danger" data-i18n="tbl_del_col">Delete column</button>
+    <button data-tbl="del" class="danger" data-i18n="tbl_del">Delete table</button>
 </div>
 
+<!-- Toast notifications -->
+<div id="toast-container" aria-live="polite"></div>
+
 <!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script src="vendor/quill/quill.js"></script>
 <script src="js/i18n.js"></script>
+<script src="js/lang/de.js"></script>
+<script src="js/lang/zh.js"></script>
+<script src="js/lang/es.js"></script>
+<script src="js/lang/it.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/blocks.js"></script>
+<script src="js/drawing.js"></script>
+<script src="js/find.js"></script>
+<script src="js/home.js"></script>
+<script src="js/whatsnew.js"></script>
+<script src="js/updater.js"></script>
+<script src="js/settings.js"></script>
 <script src="js/theme.js"></script>
 <script src="js/editor.js"></script>
 <script src="js/notes.js"></script>
 <script src="js/trash.js"></script>
 <script src="js/app.js"></script>
-
-<script>
-(function() {
-    const hour = new Date().getHours();
-    const isDark = hour < 7 || hour >= 19;
-    document.documentElement.className = isDark ? 'theme-dark' : 'theme-light';
-    document.getElementById('theme-stylesheet').href =
-        isDark ? 'css/theme-dark.css' : 'css/theme-light.css';
-})();
-</script>
 </body>
 </html>

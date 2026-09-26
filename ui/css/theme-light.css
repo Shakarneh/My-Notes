@@ -1,36 +1,44 @@
-:root {
-    --bg-base:       #e8e8e8;
-    --bg-primary:    #f0f0f0;
-    --bg-secondary:  #e6e6e6;
-    --bg-tertiary:   #fafafa;
+/* Light theme — warm paper. Accent colours are set by js/theme.js. */
+:root.theme-light {
+    color-scheme: light;
+
+    --bg-base:       #efede8;
+    --bg-primary:    #f4f2ee;
+    --bg-sidebar:    #f6f5f1;
+    --bg-secondary:  #f8f7f4;
+    --bg-tertiary:   #ffffff;
+    --bg-paper:      #ffffff;
     --bg-elevated:   #ffffff;
-    --bg-hover:      #e0e0e0;
-    --bg-active:     #d8d8d8;
+    --bg-hover:      #efede8;
+    --bg-active:     #e7e4de;
 
-    --border-color:  #dcdcdc;
-    --border-mid:    #d0d0d0;
-    --border-light:  #c8c8c8;
+    --border-color:  #e8e5df;
+    --border-mid:    #dedad3;
+    --border-light:  #cfcbc3;
 
-    --text-primary:  #141414;
-    --text-secondary:#666666;
-    --text-tertiary: #bbbbbb;
+    --text-primary:  #1d1c1a;
+    --text-secondary:#66625b;
+    --text-tertiary: #a29e96;
 
-    --accent:        #1a1a1a;
-    --accent-subtle: rgba(0,0,0,0.05);
-    --accent-border: rgba(0,0,0,0.14);
-    --accent-glow:   rgba(0,0,0,0.03);
+    --accent:        #6a55e8;
+    --accent-rgb:    106, 85, 232;
+    --on-accent:     #ffffff;
 
-    --danger:        #c0392b;
-    --danger-hover:  #a93226;
-    --success:       #27ae60;
+    --danger:        #d64545;
+    --danger-rgb:    214, 69, 69;
+    --success:       #1f9d5c;
+    --warning:       #c7850c;
 
-    --shadow-xs: 0 1px 2px rgba(0,0,0,0.08);
-    --shadow-sm: 0 2px 6px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.1);
-    --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.1);
-    --shadow-lg: 0 8px 32px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.08);
+    --mark-bg:       rgba(250, 204, 21, 0.38);
+    --mark-text:     inherit;
 
-    --inset-top: inset 0 1px 0 rgba(255,255,255,0.8);
+    --shadow-xs: 0 1px 2px rgba(40,30,10,0.06);
+    --shadow-sm: 0 2px 8px rgba(40,30,10,0.06), 0 1px 2px rgba(40,30,10,0.08);
+    --shadow-md: 0 8px 24px rgba(40,30,10,0.10), 0 2px 6px rgba(40,30,10,0.06);
+    --shadow-lg: 0 18px 48px rgba(40,30,10,0.14), 0 4px 12px rgba(40,30,10,0.08);
 
-    --scrollbar-thumb: #c8c8c8;
-    --scrollbar-track: transparent;
+    --inset-top: inset 0 1px 0 rgba(255,255,255,0.9);
+
+    --scrollbar-thumb: #d8d4cc;
+    --scrollbar-thumb-hover: #c2bdb4;
 }
