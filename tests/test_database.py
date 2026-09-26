@@ -107,7 +107,7 @@ class TestTrash(DatabaseTestCase):
         self.assertEqual(db.count_trash(), 1)
         self.assertFalse(db.save_note(a, "x", "{}", "x"), "saving a trashed note must fail")
         db.restore_note(a)
-        self.assertEqual(db.get_note(a)["is_pinned"], 0, "trashing unpins")
+        self.assertEqual(db.get_note(a)["is_pinned"], 1, "restore keeps the pin")
         db.move_to_trash(a)
         db.delete_permanently(a)
         self.assertEqual(db.count_trash(), 0)

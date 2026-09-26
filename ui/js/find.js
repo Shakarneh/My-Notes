@@ -15,11 +15,20 @@ const Find = (() => {
     // Case-insensitive; Arabic diacritics ignored so "مدرسة" finds "مَدْرَسَة"
     const DIACRITIC = /[ؐ-ًؚ-ٰٟـ]/;
 
+    // The note's text with every embed (image, drawing, divider) counted as one
+    // character, so positions line up exactly with Quill's own indexes.
+    // (quill.getText() drops embeds, which shifted every match after an image.)
+    function indexedText() {
+        return quill.getContents().ops
+            .map(op => (typeof op.insert === 'string' ? op.insert : '\uFFFC'))
+            .join('');
+    }
+
     function search() {
         const q = $('find-input').value;
         matches = [];
         if (q) {
-            const text = quill.getText();
+            const text = indexedText();
             // Build a normalized copy while remembering each char's original index
             let norm = '';
             const map = [];
@@ -45,21 +54,60 @@ const Find = (() => {
         updateCount();
     }
 
+    // Highlight matches with the CSS Custom Highlight API: nothing in the note
+    // changes and keyboard focus stays in the find box.
+    function domPoint(index) {
+        const [leaf, offset] = quill.getLeaf(index);
+        if (!leaf || !leaf.domNode || leaf.domNode.nodeType !== Node.TEXT_NODE) return null;
+        return [leaf.domNode, offset];
+    }
+
+    function toRange(m) {
+        const a = domPoint(m.index);
+        const b = domPoint(m.index + m.length);
+        if (!a || !b) return null;
+        try {
+            const r = new Range();
+            r.setStart(a[0], a[1]);
+            r.setEnd(b[0], b[1]);
+            return r;
+        } catch {
+            return null;
+        }
+    }
+
+    function paintHighlights() {
+        if (!window.CSS?.highlights) return;
+        CSS.highlights.delete('find-match');
+        CSS.highlights.delete('find-current');
+        if (!isOpen()) return;
+        const others = [], cur = [];
+        matches.forEach((m, i) => {
+            const r = toRange(m);
+            if (r) (i === current ? cur : others).push(r);
+        });
+        if (others.length) CSS.highlights.set('find-match', new Highlight(...others));
+        if (cur.length) CSS.highlights.set('find-current', new Highlight(...cur));
+    }
+
     function updateCount() {
         const el = $('find-count');
         el.textContent = matches.length ? `${current + 1}/${matches.length}` : ($('find-input').value ? I18n.t('find_none') : '');
         el.classList.toggle('none', !matches.length && !!$('find-input').value);
     }
 
+    // Show the current match: highlight + scroll. Never calls quill.setSelection,
+    // which would move focus into the note and let typing overwrite its text.
     function select() {
+        updateCount();
+        paintHighlights();
         if (current < 0 || !matches[current]) return;
         const m = matches[current];
-        quill.setSelection(m.index, m.length, 'silent');
-        // Scroll the match into view without stealing focus from the find box
-        const b = quill.getBounds(m.index, m.length);
-        const root = quill.root;
-        if (b.top < 0 || b.bottom > root.clientHeight) root.scrollTop += b.top - root.clientHeight / 3;
-        updateCount();
+        try {
+            const b = quill.getBounds(m.index, m.length);
+            const root = quill.root;
+            if (b && (b.top < 0 || b.bottom > root.clientHeight)) root.scrollTop += b.top - root.clientHeight / 3;
+        } catch {}
     }
 
     function step(dir) {
@@ -99,6 +147,7 @@ const Find = (() => {
             quill.insertText(m.index, rep, formats, 'user');
         }
         search();
+        select();
         UI.toast(I18n.t('replaced_n', { n }), { kind: 'success' });
     }
 
@@ -112,14 +161,25 @@ const Find = (() => {
         $('find-input').select();
         current = -1;
         search();
-        if (matches.length) select();
+        select();
     }
 
     function close() {
+        const m = matches[current];
         $('find-bar').classList.remove('open');
         matches = [];
         current = -1;
-        quill.focus();
+        paintHighlights();
+        // Leave the cursor on the match the user was looking at
+        if (m) quill.setSelection(m.index, m.length, 'user');
+        else quill.focus();
+    }
+
+    // Called when the note changes underneath an open find bar (typing, switching notes)
+    function refresh() {
+        if (!isOpen()) return;
+        search();
+        paintHighlights();
     }
 
     function isOpen() {
@@ -170,6 +230,7 @@ const Find = (() => {
     function attach(q) {
         quill = q;
         initLinks();
+        quill.on('text-change', () => setTimeout(refresh, 0));
         $('find-input').addEventListener('input', () => { current = 0; search(); select(); });
         $('find-input').addEventListener('keydown', e => {
             if (e.key === 'Enter') { e.preventDefault(); step(e.shiftKey ? -1 : 1); }
@@ -194,5 +255,12 @@ const Find = (() => {
         document.getElementById('btn-find')?.addEventListener('click', () => open(true));
     }
 
-    return { attach, open, close, isOpen };
+    function hide() {
+        $('find-bar')?.classList.remove('open');
+        matches = [];
+        current = -1;
+        paintHighlights();
+    }
+
+    return { attach, open, close, hide, isOpen };
 })();

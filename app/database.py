@@ -188,7 +188,8 @@ def duplicate_note(note_id: int, suffix: str = "") -> int | None:
 def move_to_trash(note_id: int):
     with connection() as conn:
         conn.execute(
-            "UPDATE notes SET is_deleted=1, deleted_at=datetime('now'), is_pinned=0 WHERE id=?",
+            # is_pinned is kept so "Undo" / restore brings the note back exactly as it was
+            "UPDATE notes SET is_deleted=1, deleted_at=datetime('now') WHERE id=?",
             (note_id,),
         )
 

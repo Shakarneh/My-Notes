@@ -1450,6 +1450,9 @@ html[lang="ar"] .home-section-title { letter-spacing: 0; font-size: 13px; }
 }
 .find-text-btn:hover { border-color: var(--accent-border); color: var(--accent); }
 
+::highlight(find-match)   { background-color: rgba(250, 204, 21, 0.35); }
+::highlight(find-current) { background-color: rgba(249, 115, 22, 0.75); color: #111; }
+
 /* ─── Drawing pad ────────────────────────────────── */
 #drawing-overlay {
     position: fixed;

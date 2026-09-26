@@ -644,7 +644,7 @@ const Editor = (() => {
 
     function resetView() {
         Blocks.closeMenu();
-        if (Find.isOpen()) document.getElementById('find-bar').classList.remove('open');
+        Find.hide();
         document.getElementById('table-toolbar').style.display = 'none';
         dirty = false;
         blank = { creating: null };
