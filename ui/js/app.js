@@ -54,33 +54,6 @@ const App = (() => {
         }
     }
 
-    async function checkForUpdate() {
-        const updateDot = $('update-dot');
-        const info = await window.pywebview.api.check_for_update();
-        if (!info || !info.ok || !info.has_update || !updateDot) return;
-
-        const label = () => `↑ v${info.latest} ${I18n.t('update_available')}`;
-        updateDot.textContent = label();
-        updateDot.style.display = 'block';
-        document.addEventListener('languagechange', () => {
-            if (!updateDot.disabled) updateDot.textContent = label();
-        });
-
-        updateDot.addEventListener('click', async () => {
-            if (!confirm(I18n.t('confirm_update', { v: info.latest }))) return;
-            await Editor.flushSave();
-            updateDot.textContent = I18n.t('updating');
-            updateDot.disabled = true;
-            const result = await window.pywebview.api.download_and_install_update(info.download_url);
-            if (!result || !result.ok) {
-                UI.toast(I18n.t('update_failed', { e: (result && result.error) || 'unknown' }), { kind: 'error' });
-                updateDot.textContent = label();
-                updateDot.disabled = false;
-            }
-            // On success the app shuts down and the installer takes over.
-        });
-    }
-
     async function start() {
         const settings = await window.pywebview.api.get_settings();
 
@@ -203,7 +176,7 @@ const App = (() => {
             if (!document.querySelector('.note-card:focus')) Notes.refreshList();
         }, 60 * 1000);
 
-        checkForUpdate().catch(() => {});
+        Updater.init();
     }
 
     return { start, showNotesView, showTrashView, newNote };

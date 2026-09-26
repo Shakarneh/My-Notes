@@ -2,15 +2,11 @@ from __future__ import annotations
 
 from app import database, theme
 from app.config import TRASH_DAYS
+from app.updater import Updater, parse_version as _parse_version
 import os
 import base64
 import json
 import re
-import subprocess
-import tempfile
-import threading
-import urllib.parse
-import urllib.request
 import webbrowser
 from datetime import datetime
 import webview
@@ -20,27 +16,12 @@ APP_VERSION = "1.3.0"
 GITHUB_REPO = "Shakarneh/My-Notes"
 
 
-def _is_github_host(host) -> bool:
-    # Release downloads start on github.com and redirect to a *.githubusercontent.com CDN.
-    host = (host or "").lower()
-    return host == "github.com" or host.endswith(".githubusercontent.com")
-
-
 _IMAGE_MIME = {
     "jpg": "image/jpeg", "jpeg": "image/jpeg",
     "png": "image/png", "gif": "image/gif",
     "bmp": "image/bmp", "webp": "image/webp",
 }
 _MAX_IMAGE_BYTES = 25 * 1024 * 1024
-
-
-def _parse_version(v: str):
-    if not v:
-        return (0, 0, 0)
-    m = re.match(r"v?(\d+)(?:\.(\d+))?(?:\.(\d+))?", v.strip())
-    if not m:
-        return (0, 0, 0)
-    return tuple(int(x or 0) for x in m.groups())
 
 
 def _safe_filename(name: str, fallback: str = "note") -> str:
@@ -257,84 +238,25 @@ class Api:
     # ─── Updates ──────────────────────────────────────────────────────────
 
     def check_for_update(self):
-        try:
-            url = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
-            req = urllib.request.Request(url, headers={
-                "User-Agent": "MyNote-Updater",
-                "Accept": "application/vnd.github+json",
-            })
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-            latest = (data.get("tag_name") or "").lstrip("v")
-            release_url = data.get("html_url") or ""
-            assets = data.get("assets") or []
-            exe_asset = next(
-                (a for a in assets if a.get("name", "").lower().endswith(".exe")),
-                None,
-            )
-            download_url = exe_asset.get("browser_download_url") if exe_asset else None
-            has_update = (
-                _parse_version(latest) > _parse_version(self.APP_VERSION)
-                and bool(download_url)
-            )
-            return {
-                "ok": True,
-                "current": self.APP_VERSION,
-                "latest": latest,
-                "has_update": has_update,
-                "download_url": download_url,
-                "release_url": release_url,
-            }
-        except Exception as e:
-            return {"ok": False, "error": str(e)}
+        """Check GitHub for a newer release; a newer one downloads in the background."""
+        return _updater.check()
 
-    def download_and_install_update(self, url: str):
-        try:
-            parsed = urllib.parse.urlparse(url or "")
-            if parsed.scheme != "https" or (parsed.hostname or "").lower() != "github.com":
-                return {"ok": False, "error": "Invalid download URL"}
-            if not parsed.path.lower().startswith(f"/{GITHUB_REPO}/releases/download/".lower()):
-                return {"ok": False, "error": "Invalid download URL"}
+    def get_update_status(self):
+        return _updater.status()
 
-            tmpdir = tempfile.gettempdir()
-            filename = _safe_filename(parsed.path.rsplit("/", 1)[-1], "MyNotes-Setup.exe")
-            if not filename.lower().endswith(".exe"):
-                filename += ".exe"
-            installer_path = os.path.join(tmpdir, filename)
-            partial_path = installer_path + ".part"
+    def install_update(self):
+        return _updater.install()
 
-            req = urllib.request.Request(url, headers={"User-Agent": "MyNote-Updater"})
-            with urllib.request.urlopen(req, timeout=60) as resp:
-                final_host = urllib.parse.urlparse(resp.geturl()).hostname
-                if not _is_github_host(final_host):
-                    return {"ok": False, "error": "Unexpected download host"}
-                with open(partial_path, "wb") as f:
-                    while True:
-                        chunk = resp.read(64 * 1024)
-                        if not chunk:
-                            break
-                        f.write(chunk)
-            # Only swap in a fully downloaded installer — never run a truncated one.
-            os.replace(partial_path, installer_path)
+    def consume_version_change(self):
+        """Report once, on the first launch after an update, which version is new."""
+        previous = database.get_setting("last_version")
+        database.set_setting("last_version", APP_VERSION)
+        updated = bool(previous) and _parse_version(previous) < _parse_version(APP_VERSION)
+        return {
+            "updated": updated,
+            "version": APP_VERSION,
+            "release_url": f"https://github.com/{GITHUB_REPO}/releases/tag/v{APP_VERSION}",
+        }
 
-            flags = (
-                getattr(subprocess, "DETACHED_PROCESS", 0)
-                | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
-            )
-            subprocess.Popen(
-                [installer_path, "/SILENT", "/CLOSEAPPLICATIONS", "/RESTARTAPPLICATIONS"],
-                creationflags=flags,
-                close_fds=True,
-            )
 
-            def _shutdown():
-                for w in list(webview.windows):
-                    try:
-                        w.destroy()
-                    except Exception:
-                        pass
-
-            threading.Timer(0.5, _shutdown).start()
-            return {"ok": True, "installer_path": installer_path}
-        except Exception as e:
-            return {"ok": False, "error": str(e)}
+_updater = Updater(APP_VERSION, GITHUB_REPO)
