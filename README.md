@@ -1,12 +1,47 @@
-<p align="center"><img src="ui/assets/logo.png" width="128" alt="My Notes logo"></p>
+<p align="center"><img src="ui/assets/logo.png" width="112" alt="My Notes logo"></p>
 
-# My Notes
+<h1 align="center">My Notes</h1>
 
-A fast, beautiful desktop notes app for Windows — in Arabic (RTL), English, Russian, German, Chinese, Spanish and Italian — with block-style editing, tables, drawings, automatic updates and full offline support.
+<p align="center">
+  <b>Beautiful notes for Windows — blocks, tables, drawings and automatic updates.</b><br>
+  Built for Arabic (RTL) from day one, and speaks English, Русский, Deutsch, 中文, Español and Italiano too.
+</p>
+
+<p align="center" dir="rtl">
+  تطبيق ملاحظات جميل لويندوز يدعم العربية بالكامل — كتل، جداول، رسم بخط اليد، وتحديث تلقائي. مجاني ويعمل بدون إنترنت.
+</p>
+
+<p align="center">
+  <a href="https://github.com/Shakarneh/My-Notes/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/Shakarneh/My-Notes?style=for-the-badge&color=6a55e8&label=version"></a>
+  <a href="https://github.com/Shakarneh/My-Notes/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/Shakarneh/My-Notes/total?style=for-the-badge&color=1f9d5c"></a>
+  <img alt="Windows 10 and 11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-2f6fe0?style=for-the-badge">
+  <img alt="7 languages" src="https://img.shields.io/badge/languages-7-d6456a?style=for-the-badge">
+</p>
+
+<p align="center">
+  <a href="https://github.com/Shakarneh/My-Notes/releases/latest"><b>⬇️ Download for Windows</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://shakarneh.github.io/My-Notes/">Website</a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/Shakarneh/My-Notes/issues/new/choose">Report a bug / suggest a feature</a>
+</p>
+
+<p align="center"><img src="docs/screenshots/demo.gif" width="880" alt="Typing a note with headings, a to-do list, a callout and a table"></p>
+
+## Screenshots
+
+| | |
+|---|---|
+| <img src="docs/screenshots/editor-dark.png" alt="Note with checklist, callout and table in dark mode"> | <img src="docs/screenshots/editor-arabic-light.png" alt="Arabic right-to-left note in light mode"> |
+| **Rich notes** — headings, to-dos, callouts, tables | **Arabic first** — every line picks its own direction |
+| <img src="docs/screenshots/slash-menu.png" alt="The slash block menu"> | <img src="docs/screenshots/drawing.png" alt="Drawing pad"> |
+| **Type `/`** to insert any block | **Draw** by hand, right inside a note |
+| <img src="docs/screenshots/home-dark.png" alt="Home screen with quick actions and recent notes"> | <img src="docs/screenshots/settings-languages.png" alt="Settings with seven languages"> |
+| **Home** — quick create and recent notes | **Settings** — 7 languages, themes, editor options |
 
 ## Download
 
-👉 [Download the latest version](https://github.com/Shakarneh/My-Notes/releases/latest)
+👉 [Download the latest version](https://github.com/Shakarneh/My-Notes/releases/latest) — run the installer and you're done. The app keeps itself up to date.
 
 ## Features
 
@@ -76,6 +111,7 @@ Shortcuts work on Arabic and Russian keyboard layouts too.
 
 1. Download `MyNotes-Setup-v1.4.0.exe` from the [Releases page](https://github.com/Shakarneh/My-Notes/releases)
 2. Run the installer and follow the steps
+   (if Windows shows *"Windows protected your PC"*, click **More info → Run anyway** — the app is new and not yet code-signed)
 3. Launch **My Notes** from the desktop shortcut or Start Menu
 
 The app keeps itself up to date automatically.
@@ -102,6 +138,9 @@ Releases are built in the cloud by GitHub Actions — no Windows build machine n
 4. Click **Run workflow**. It bumps the version, tags it, builds the installer and publishes the GitHub Release.
 
 Every installed copy of My Notes finds the release on its next check, downloads it in the background and offers **Restart & update**. New users always get the latest version from the download link above.
+
+After a release, update the [winget](https://learn.microsoft.com/windows/package-manager/) listing with
+`wingetcreate update Shakarneh.MyNotes --version X.Y.Z --urls <installer-url> --submit` (the first submission uses the manifests in `winget/`).
 
 Every push to any branch also builds the installer — download it from the run's **Artifacts** to test before releasing. (`release.ps1` still works for building locally on Windows.)
 

@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+PackageIdentifier: Shakarneh.MyNotes
+PackageVersion: 1.4.0
+PackageLocale: en-US
+Publisher: Mohammed Shakarneh
+PublisherUrl: https://github.com/Shakarneh
+PackageName: My Notes
+PackageUrl: https://github.com/Shakarneh/My-Notes
+License: Freeware
+ShortDescription: Beautiful notes for Windows with full Arabic (RTL) support, blocks, tables, drawings and automatic updates.
+Description: |-
+  My Notes is a free notes app for Windows. Type / to insert headings, to-dos, tables, callouts and drawings,
+  write in Arabic and English side by side, and search across all notes. Available in Arabic, English, Russian,
+  German, Chinese, Spanish and Italian. Works offline and keeps itself up to date.
+Moniker: mynotes
+Tags:
+  - notes
+  - note-taking
+  - arabic
+  - rtl
+  - markdown
+  - productivity
+ReleaseNotesUrl: https://github.com/Shakarneh/My-Notes/releases/tag/v1.4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

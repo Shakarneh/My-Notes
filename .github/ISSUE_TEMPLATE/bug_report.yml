@@ -1,0 +1,34 @@
+name: 🐞 Bug report / الإبلاغ عن مشكلة
+description: Something doesn't work as expected / شيء لا يعمل كما يجب
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping make My Notes better! شكراً لمساعدتك في تحسين التطبيق!
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened? / ماذا حدث؟
+      description: Steps to reproduce, what you expected and what you saw. Screenshots help a lot.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version / إصدار التطبيق
+      description: Settings → About (e.g. 1.4.0)
+    validations:
+      required: true
+  - type: dropdown
+    id: windows
+    attributes:
+      label: Windows version
+      options: [Windows 11, Windows 10, Other]
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: App language / لغة التطبيق
+      options: [العربية, English, Русский, Deutsch, 中文, Español, Italiano]

@@ -1,0 +1,16 @@
+name: ✨ Feature idea / اقتراح ميزة
+description: Suggest something that would make My Notes better / اقترح شيئاً يجعل التطبيق أفضل
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea / فكرتك
+      description: What would you like, and why would it help you?
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else? / أي شيء آخر؟
+      description: Examples from other apps, sketches, screenshots…
