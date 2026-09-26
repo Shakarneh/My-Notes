@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from app import database, theme
-from app.config import TRASH_DAYS
+from app.config import TRASH_DAYS, get_db_path
 from app.updater import Updater, parse_version as _parse_version
 import os
 import base64
@@ -15,6 +15,32 @@ import webview
 APP_VERSION = "1.3.0"
 GITHUB_REPO = "Shakarneh/My-Notes"
 
+
+LANGUAGES = ("ar", "en", "ru", "de", "zh", "es", "it")
+
+
+def _one_of(*options):
+    return lambda v: v in options
+
+
+def _int_between(lo, hi):
+    return lambda v: v.isdigit() and lo <= int(v) <= hi
+
+
+# key -> (default, validator). Anything not listed here cannot be written from the UI.
+_SETTINGS = {
+    "language":        ("ar", _one_of(*LANGUAGES)),
+    "theme_override":  ("auto", _one_of("auto", "light", "dark")),
+    "accent":          ("violet", _one_of("violet", "blue", "teal", "amber", "rose", "mono")),
+    "focus_mode":      ("0", _one_of("0", "1")),
+    "editor_size":     ("16", _int_between(12, 26)),
+    "editor_width":    ("medium", _one_of("narrow", "medium", "wide", "full")),
+    "editor_spacing":  ("normal", _one_of("compact", "normal", "relaxed")),
+    "editor_font":     ("default", _one_of("default", "tajawal", "plex", "serif", "mono")),
+    "spellcheck":      ("1", _one_of("0", "1")),
+    "auto_update":     ("1", _one_of("0", "1")),
+    "reduce_motion":   ("0", _one_of("0", "1")),
+}
 
 _IMAGE_MIME = {
     "jpg": "image/jpeg", "jpeg": "image/jpeg",
@@ -97,19 +123,38 @@ class Api:
         return theme.get_current_theme()
 
     def get_settings(self):
+        values = {key: database.get_setting(key) for key in _SETTINGS}
         return {
-            "theme_override": database.get_setting("theme_override") or "auto",
-            "language":       database.get_setting("language") or "ar",
-            "accent":         database.get_setting("accent") or "violet",
-            "focus_mode":     database.get_setting("focus_mode") == "1",
-            "trash_days":     TRASH_DAYS,
+            **{key: (values[key] if values[key] is not None else default)
+               for key, (default, _) in _SETTINGS.items()},
+            "focus_mode":  values["focus_mode"] == "1",
+            "spellcheck":  values["spellcheck"] != "0",
+            "auto_update": values["auto_update"] != "0",
+            "reduce_motion": values["reduce_motion"] == "1",
+            "trash_days":  TRASH_DAYS,
+            "data_folder": os.path.dirname(get_db_path()),
         }
 
     def update_setting(self, key, value):
-        if key not in ("theme_override", "language", "accent", "focus_mode"):
+        spec = _SETTINGS.get(key)
+        if not spec:
+            return False
+        value = str(value)
+        if not spec[1](value):
             return False
         database.set_setting(key, value)
         return True
+
+    def open_data_folder(self):
+        folder = os.path.dirname(get_db_path())
+        try:
+            if hasattr(os, "startfile"):
+                os.startfile(folder)  # type: ignore[attr-defined]
+            else:
+                webbrowser.open("file://" + folder)
+            return True
+        except Exception:
+            return False
 
     def get_version(self):
         return self.APP_VERSION
@@ -248,12 +293,18 @@ class Api:
         return _updater.install()
 
     def consume_version_change(self):
-        """Report once, on the first launch after an update, which version is new."""
+        """Once per version: tell the UI whether to show the "What's new" screen.
+
+        v1.3.0 and older never stored last_version, so a missing value with
+        existing notes means "updated from an old version", not a fresh install.
+        """
         previous = database.get_setting("last_version")
         database.set_setting("last_version", APP_VERSION)
-        updated = bool(previous) and _parse_version(previous) < _parse_version(APP_VERSION)
+        fresh_install = previous is None and not database.get_all_notes() and database.count_trash() == 0
         return {
-            "updated": updated,
+            "show": previous != APP_VERSION,
+            "first_run": fresh_install,
+            "updated": previous is not None and _parse_version(previous) < _parse_version(APP_VERSION),
             "version": APP_VERSION,
             "release_url": f"https://github.com/{GITHUB_REPO}/releases/tag/v{APP_VERSION}",
         }

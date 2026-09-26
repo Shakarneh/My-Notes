@@ -7,10 +7,12 @@ const UI = (() => {
     }
 
     // Gregorian calendar everywhere ('ar-SA' alone defaults to the Hijri calendar).
+    const LOCALES = {
+        ar: 'ar-u-ca-gregory-nu-latn', en: 'en-US', ru: 'ru-RU',
+        de: 'de-DE', zh: 'zh-CN', es: 'es-ES', it: 'it-IT',
+    };
     function locale() {
-        return I18n.current === 'ar' ? 'ar-u-ca-gregory-nu-latn'
-             : I18n.current === 'ru' ? 'ru-RU'
-             : 'en-US';
+        return LOCALES[I18n.current] || 'en-US';
     }
 
     function parseDbDate(iso) {

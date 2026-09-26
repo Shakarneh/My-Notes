@@ -196,7 +196,10 @@ const Updater = (() => {
         try { apply(await window.pywebview.api.get_update_status()); } catch {}
     }
 
-    async function check() {
+    // Automatic checks honour the "Automatic updates" setting; the Settings
+    // window's "Check for updates" button passes manual=true.
+    async function check(manual = false) {
+        if (!manual && Settings.get('auto_update') === false) return;
         try { apply(await window.pywebview.api.check_for_update()); } catch {}
     }
 
@@ -227,22 +230,15 @@ const Updater = (() => {
             if ($('update-modal')) openModal();
         });
 
-        // First launch after an update → say so, with a link to the release notes
+        // First launch of a new version (or a fresh install) → the "What's new" showcase
         try {
             const change = await window.pywebview.api.consume_version_change();
-            if (change?.updated) {
-                UI.toast(I18n.t('upd_updated', { v: change.version }), {
-                    kind: 'success',
-                    action: I18n.t('upd_whats_new'),
-                    onAction: () => window.pywebview.api.open_url(change.release_url),
-                    duration: 9000,
-                });
-            }
+            if (change?.show) WhatsNew.open({ version: change.version, firstRun: change.first_run });
         } catch {}
 
         check();
         setInterval(check, CHECK_EVERY);
     }
 
-    return { init, check, status: () => state };
+    return { init, check, install, showNotes: openModal, status: () => state };
 })();

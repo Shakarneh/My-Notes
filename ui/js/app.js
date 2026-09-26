@@ -59,6 +59,7 @@ const App = (() => {
 
         await I18n.init(settings);
         await Theme.init(settings);
+        Settings.init(settings);
         Trash.init(settings);
         Editor.init();
         Home.init();
@@ -81,8 +82,6 @@ const App = (() => {
         $('btn-empty-trash').addEventListener('click', Trash.emptyAll);
 
         // ── Footer tools ──
-        $('btn-backup')?.addEventListener('click', runBackup);
-        $('btn-restore-backup')?.addEventListener('click', runRestore);
         $('btn-focus')?.addEventListener('click', () => setFocusMode(!document.body.classList.contains('focus-mode')));
 
         // ── Search ──
@@ -166,7 +165,8 @@ const App = (() => {
                 setFocusMode(!document.body.classList.contains('focus-mode'));
             } else if (e.key === 'Escape' && document.body.classList.contains('focus-mode')
                        && !document.getElementById('spell-context-menu') && !Blocks.isOpen()
-                       && !Find.isOpen() && !document.getElementById('drawing-overlay')) {
+                       && !Find.isOpen() && !document.getElementById('drawing-overlay')
+                       && !WhatsNew.isOpen() && !document.getElementById('settings-modal')) {
                 setFocusMode(false);
             }
         });
@@ -179,7 +179,7 @@ const App = (() => {
         Updater.init();
     }
 
-    return { start, showNotesView, showTrashView, newNote };
+    return { start, showNotesView, showTrashView, newNote, runBackup, runRestore };
 })();
 
 window.addEventListener('pywebviewready', () => {

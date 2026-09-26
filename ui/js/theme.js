@@ -52,9 +52,7 @@ const Theme = (() => {
         await refresh();
 
         document.getElementById('btn-theme')?.addEventListener('click', async () => {
-            mode = MODES[(MODES.indexOf(mode) + 1) % MODES.length];
-            await window.pywebview.api.update_setting('theme_override', mode);
-            await refresh();
+            await setMode(MODES[(MODES.indexOf(mode) + 1) % MODES.length]);
             UI.toast(I18n.t('theme_' + mode));
         });
 
@@ -75,10 +73,8 @@ const Theme = (() => {
             popover.addEventListener('click', async e => {
                 const sw = e.target.closest('.accent-swatch');
                 if (!sw) return;
-                accent = sw.dataset.accent;
-                paint();
                 popover.classList.remove('open');
-                await window.pywebview.api.update_setting('accent', accent);
+                await setAccent(sw.dataset.accent);
             });
             document.addEventListener('mousedown', e => {
                 if (!e.target.closest('#accent-popover') && !e.target.closest('#btn-accent')) {
@@ -92,5 +88,23 @@ const Theme = (() => {
         setInterval(refresh, 5 * 60 * 1000);
     }
 
-    return { init, refresh, paint };
+    async function setMode(next) {
+        if (!MODES.includes(next)) return;
+        mode = next;
+        await window.pywebview.api.update_setting('theme_override', mode);
+        await refresh();
+    }
+
+    async function setAccent(name) {
+        if (!ACCENTS[name]) return;
+        accent = name;
+        paint();
+        await window.pywebview.api.update_setting('accent', accent);
+    }
+
+    function accents() {
+        return Object.entries(ACCENTS).map(([name, [dark, light]]) => ({ name, dark, light }));
+    }
+
+    return { init, refresh, paint, setMode, setAccent, accents };
 })();

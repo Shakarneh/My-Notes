@@ -2,7 +2,6 @@ const I18n = (() => {
     const translations = {
         ar: {
             dir: 'rtl',
-            app_title: 'My Note',
             all_notes: 'كل الملاحظات',
             home_sub: 'بماذا تفكر اليوم؟',
             greet_morning: 'صباح الخير',
@@ -24,12 +23,8 @@ const I18n = (() => {
             clear_search: 'مسح البحث (Esc)',
             new_note_tooltip: 'ملاحظة جديدة (Ctrl+N)',
             new_note_title: 'ملاحظة جديدة',
-            create_note: 'ملاحظة جديدة',
             editor_placeholder: 'ابدأ الكتابة… أو اكتب / لإضافة عنوان، جدول، قائمة مهام، رسم…',
-            no_note_msg: 'اختر ملاحظة أو أنشئ واحدة جديدة',
-            hint_new: 'ملاحظة جديدة',
             hint_search: 'بحث',
-            hint_save: 'حفظ فوري',
             empty_trash_btn: 'تفريغ السلة',
             trash_title: 'سلة المهملات',
             trash_subtitle: 'تُحذف الملاحظات نهائياً بعد {n} يوماً',
@@ -62,10 +57,6 @@ const I18n = (() => {
             translate: 'ترجمة',
             search_web: 'بحث',
             ignore_spell: 'تجاهل التدقيق',
-            update_available: 'متاح',
-            confirm_update: 'تحديث إلى الإصدار {v}؟\n\nسيتم تنزيل التحديث وتثبيته تلقائيًا، وسيُغلق التطبيق ثم يُعاد تشغيله.',
-            updating: 'جاري التحديث...',
-            update_failed: 'فشل التحديث: {e}',
             stats: '{w} كلمة · {c} حرف · {m} د قراءة',
             pin: 'تثبيت في الأعلى',
             unpin: 'إلغاء التثبيت',
@@ -122,7 +113,6 @@ const I18n = (() => {
         },
         en: {
             dir: 'ltr',
-            app_title: 'My Note',
             all_notes: 'All Notes',
             home_sub: 'What’s on your mind today?',
             greet_morning: 'Good morning',
@@ -144,12 +134,8 @@ const I18n = (() => {
             clear_search: 'Clear search (Esc)',
             new_note_tooltip: 'New Note (Ctrl+N)',
             new_note_title: 'New Note',
-            create_note: 'New note',
             editor_placeholder: 'Start writing… or type / for headings, tables, to-dos, drawings…',
-            no_note_msg: 'Select a note or create a new one',
-            hint_new: 'New note',
             hint_search: 'Search',
-            hint_save: 'Save now',
             empty_trash_btn: 'Empty Trash',
             trash_title: 'Trash',
             trash_subtitle: 'Notes are deleted forever after {n} days',
@@ -182,10 +168,6 @@ const I18n = (() => {
             translate: 'Translate',
             search_web: 'Search',
             ignore_spell: 'Ignore spelling',
-            update_available: 'available',
-            confirm_update: 'Update to v{v}?\n\nThe update will download and install automatically. The app will close and reopen.',
-            updating: 'Updating...',
-            update_failed: 'Update failed: {e}',
             stats: '{w} words · {c} characters · {m} min read',
             pin: 'Pin to top',
             unpin: 'Unpin',
@@ -242,7 +224,6 @@ const I18n = (() => {
         },
         ru: {
             dir: 'ltr',
-            app_title: 'My Note',
             all_notes: 'Все заметки',
             home_sub: 'О чём вы думаете сегодня?',
             greet_morning: 'Доброе утро',
@@ -264,12 +245,8 @@ const I18n = (() => {
             clear_search: 'Очистить поиск (Esc)',
             new_note_tooltip: 'Новая заметка (Ctrl+N)',
             new_note_title: 'Новая заметка',
-            create_note: 'Новая заметка',
             editor_placeholder: 'Начните писать… или введите / для заголовков, таблиц, задач, рисунков…',
-            no_note_msg: 'Выберите заметку или создайте новую',
-            hint_new: 'Новая заметка',
             hint_search: 'Поиск',
-            hint_save: 'Сохранить',
             empty_trash_btn: 'Очистить корзину',
             trash_title: 'Корзина',
             trash_subtitle: 'Заметки удаляются навсегда через {n} дней',
@@ -302,10 +279,6 @@ const I18n = (() => {
             translate: 'Перевести',
             search_web: 'Поиск',
             ignore_spell: 'Не проверять',
-            update_available: 'доступна',
-            confirm_update: 'Обновить до v{v}?\n\nОбновление загрузится и установится автоматически. Приложение закроется и запустится заново.',
-            updating: 'Обновление...',
-            update_failed: 'Ошибка обновления: {e}',
             stats: 'Слов: {w} · Символов: {c} · {m} мин чтения',
             pin: 'Закрепить',
             unpin: 'Открепить',
@@ -388,31 +361,24 @@ const I18n = (() => {
         document.querySelectorAll('[data-i18n-title]').forEach(el => {
             el.title = t(el.dataset.i18nTitle);
         });
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.lang === lang);
-        });
-
         const editorRoot = document.querySelector('.ql-editor');
         if (editorRoot) editorRoot.dataset.placeholder = t('editor_placeholder');
     }
 
     async function init(settings) {
-        apply(settings.language || 'ar');
-
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                if (btn.dataset.lang === current) return;
-                apply(btn.dataset.lang);
-                await window.pywebview.api.update_setting('language', btn.dataset.lang);
-                document.dispatchEvent(new CustomEvent('languagechange'));
-            });
-        });
+        apply(translations[settings.language] ? settings.language : 'ar');
     }
 
     // Lets feature modules ship their own strings: I18n.extend({ ar: {...}, en: {...}, ru: {...} })
     function extend(extra) {
-        Object.keys(extra).forEach(lang => Object.assign(translations[lang] || {}, extra[lang]));
+        Object.keys(extra).forEach(lang => {
+            translations[lang] = Object.assign(translations[lang] || {}, extra[lang]);
+        });
     }
 
-    return { init, t, apply, extend, get current() { return current; } };
+    return {
+        init, t, apply, extend,
+        get current() { return current; },
+        keys: lang => Object.keys(translations[lang] || {}),   // used by the translation-coverage test
+    };
 })();
