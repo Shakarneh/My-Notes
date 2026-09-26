@@ -84,6 +84,7 @@ I18n.extend({ zh: {
     upd_required_msg: '需要版本 {v} 才能继续使用 My Note。你的笔记会原样保留。',
     upd_installing: '正在安装更新…', upd_updated: '已更新到 v{v}',
     upd_failed: '更新失败：{e}', upd_ready_toast: '版本 {v} 已下载',
+    upd_retry: '重试', upd_dl_failed: '无法下载更新。请检查网络连接后重试。',
     upd_no_notes: '改进与修复。',
     settings: '设置', settings_tip: '设置（Ctrl+,）',
     set_appearance: '外观', set_editor: '编辑器', set_language: '语言', set_updates: '更新',

@@ -363,7 +363,7 @@ const Editor = (() => {
         Find.attach(quill);
 
         // Native spellcheck (Quill disables it by default)
-        quill.root.setAttribute('spellcheck', 'true');
+        quill.root.setAttribute('spellcheck', Settings.get('spellcheck') === false ? 'false' : 'true');
         quill.root.setAttribute('dir', 'auto');
 
         // ── Toolbar: formats ──

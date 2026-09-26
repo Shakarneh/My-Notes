@@ -24,6 +24,7 @@ const Updater = (() => {
             upd_failed: 'فشل التحديث: {e}',
             upd_ready_toast: 'تم تنزيل الإصدار {v}',
             upd_no_notes: 'تحسينات وإصلاحات.',
+            upd_retry: 'إعادة المحاولة', upd_dl_failed: 'تعذّر تنزيل التحديث. تحقق من اتصالك بالإنترنت ثم أعد المحاولة.',
         },
         en: {
             upd_downloading: 'Downloading v{v}… {p}%',
@@ -39,6 +40,7 @@ const Updater = (() => {
             upd_failed: 'Update failed: {e}',
             upd_ready_toast: 'Version {v} downloaded',
             upd_no_notes: 'Improvements and fixes.',
+            upd_retry: 'Try again', upd_dl_failed: 'The update could not be downloaded. Check your internet connection and try again.',
         },
         ru: {
             upd_downloading: 'Загрузка v{v}… {p}%',
@@ -54,6 +56,7 @@ const Updater = (() => {
             upd_failed: 'Ошибка обновления: {e}',
             upd_ready_toast: 'Версия {v} загружена',
             upd_no_notes: 'Улучшения и исправления.',
+            upd_retry: 'Повторить', upd_dl_failed: 'Не удалось загрузить обновление. Проверьте интернет и повторите попытку.',
         },
     });
 
@@ -118,6 +121,7 @@ const Updater = (() => {
         if (!state) return;
         const required = !!state.required;
         const ready = state.status === 'ready';
+        const failed = state.status === 'error';
         const pct = Math.round((state.progress || 0) * 100);
         const overlay = document.createElement('div');
         overlay.id = 'update-modal';
@@ -130,19 +134,23 @@ const Updater = (() => {
                 <h2>${UI.esc(required ? I18n.t('upd_required_title') : I18n.t('upd_title', { v: state.latest }))}</h2>
                 ${required ? `<p class="upd-required-msg">${UI.esc(I18n.t('upd_required_msg', { v: state.latest }))}</p>` : ''}
                 <div class="upd-notes" dir="auto">${notesHtml(state.notes)}</div>
-                ${ready ? '' : `<div class="upd-bar big"><span style="width:${pct}%"></span></div>
+                ${failed ? `<p class="upd-error">${UI.esc(I18n.t('upd_dl_failed'))}</p>`
+                  : ready ? '' : `<div class="upd-bar big"><span style="width:${pct}%"></span></div>
                     <p class="upd-progress-label">${UI.esc(I18n.t('upd_downloading', { v: state.latest, p: pct }))}</p>`}
                 <div class="upd-dialog-actions">
                     ${required ? '' : `<button class="draw-btn" data-upd="later">${UI.esc(I18n.t('upd_later'))}</button>`}
-                    <button class="primary-btn" data-upd="install" ${ready && !installing ? '' : 'disabled'}>
-                        ${UI.esc(installing ? I18n.t('upd_installing') : I18n.t('upd_restart'))}
-                    </button>
+                    ${failed
+                        ? `<button class="primary-btn" data-upd="retry">${UI.esc(I18n.t('upd_retry'))}</button>`
+                        : `<button class="primary-btn" data-upd="install" ${ready && !installing ? '' : 'disabled'}>
+                            ${UI.esc(installing ? I18n.t('upd_installing') : I18n.t('upd_restart'))}
+                          </button>`}
                 </div>
             </div>`;
         document.body.appendChild(overlay);
         overlay.addEventListener('click', e => {
             const act = e.target.closest('[data-upd]')?.dataset.upd;
             if (act === 'install') install();
+            else if (act === 'retry') check(true);
             else if (act === 'later') closeModal();
             else if (e.target === overlay && !required) closeModal();
         });
@@ -190,6 +198,8 @@ const Updater = (() => {
 
         clearTimeout(pollTimer);
         if (state?.status === 'downloading') pollTimer = setTimeout(poll, 600);
+        // A required update must not leave the user stuck: keep retrying quietly
+        else if (state?.status === 'error' && state.required) pollTimer = setTimeout(() => check(true), 60 * 1000);
     }
 
     async function poll() {

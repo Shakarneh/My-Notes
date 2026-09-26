@@ -2096,3 +2096,4 @@ html[dir="rtl"] .wn-arrow { transform: scaleX(-1); }
 html[dir="rtl"] .wn-start:hover .wn-arrow { transform: scaleX(-1) translateX(3px); }
 .wn-logo { width: 64px; height: 64px; display: block; margin-bottom: 18px; filter: drop-shadow(0 12px 28px rgba(79, 70, 229, 0.45)); animation: wn-pop 0.7s var(--ease) both; }
 @keyframes wn-pop { from { transform: scale(0.4) rotate(-20deg); opacity: 0; } 60% { transform: scale(1.08) rotate(4deg); opacity: 1; } to { transform: none; } }
+.upd-error { margin-top: 16px; font-size: 13px; line-height: 1.6; color: var(--danger); }

@@ -84,6 +84,7 @@ I18n.extend({ it: {
     upd_required_msg: 'Serve la versione {v} per continuare a usare My Note. Le tue note restano esattamente come sono.',
     upd_installing: 'Installazione dell’aggiornamento…', upd_updated: 'Aggiornato alla v{v}',
     upd_failed: 'Aggiornamento non riuscito: {e}', upd_ready_toast: 'Versione {v} scaricata',
+    upd_retry: 'Riprova', upd_dl_failed: 'Impossibile scaricare l’aggiornamento. Controlla la connessione a internet e riprova.',
     upd_no_notes: 'Miglioramenti e correzioni.',
     settings: 'Impostazioni', settings_tip: 'Impostazioni (Ctrl+,)',
     set_appearance: 'Aspetto', set_editor: 'Editor', set_language: 'Lingua', set_updates: 'Aggiornamenti',

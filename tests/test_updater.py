@@ -147,3 +147,22 @@ class TestUpdater(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestInstallerWatcher(unittest.TestCase):
+    def test_script_quotes_paths(self):
+        script = upd.watcher_script(r"C:\Users\O'Neil\AppData\Local\NotesApp\updates\setup.exe",
+                                    r"C:\Program Files\My Notes\NotesApp.exe")
+        self.assertIn(r"'C:\Users\O''Neil\AppData\Local\NotesApp\updates\setup.exe'", script)
+        self.assertIn("'/SILENT'", script)
+        self.assertIn(r"Start-Process -FilePath 'C:\Program Files\My Notes\NotesApp.exe'", script)
+        self.assertIn("$p.ExitCode -ne 0", script)
+
+    def test_unicode_path_survives_encoding(self):
+        import base64
+        path = "C:\\Users\\محمد\\AppData\\Local\\NotesApp\\updates\\setup.exe"
+        encoded = base64.b64encode(upd.watcher_script(path, None).encode("utf-16-le"))
+        self.assertIn(path, base64.b64decode(encoded).decode("utf-16-le"))
+
+    def test_no_relaunch_when_not_frozen(self):
+        self.assertNotIn("ExitCode", upd.watcher_script("C:\\setup.exe", None))

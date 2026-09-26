@@ -11,12 +11,14 @@ will not let the user dismiss it.
 """
 from __future__ import annotations
 
+import base64
 import glob
 import hashlib
 import json
 import os
 import re
 import subprocess
+import sys
 import threading
 import time
 import urllib.parse
@@ -41,6 +43,26 @@ def _is_github_host(host) -> bool:
     # Release downloads start on github.com and redirect to a *.githubusercontent.com CDN.
     host = (host or "").lower()
     return host == "github.com" or host.endswith(".githubusercontent.com")
+
+
+INSTALLER_ARGS = ["/SILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/CLOSEAPPLICATIONS", "/RESTARTAPPLICATIONS"]
+
+
+def _ps_quote(value: str) -> str:
+    return "'" + value.replace("'", "''") + "'"
+
+
+def watcher_script(installer: str, app_exe: str | None) -> str:
+    """PowerShell that runs the installer and reopens the current app if the
+    install does not complete (e.g. the user said "No" to the Windows admin
+    prompt). On success the installer itself launches the new version."""
+    args = ",".join(_ps_quote(a) for a in INSTALLER_ARGS)
+    script = (
+        f"$p = Start-Process -FilePath {_ps_quote(installer)} -ArgumentList {args} -Wait -PassThru\n"
+    )
+    if app_exe:
+        script += f"if ($p.ExitCode -ne 0) {{ Start-Process -FilePath {_ps_quote(app_exe)} }}\n"
+    return script
 
 
 def _updates_dir() -> str:
@@ -117,17 +139,25 @@ class Updater:
             ready = self._state["status"] == "ready"
         if not ready or not path or not os.path.exists(path):
             return {"ok": False, "error": "Update is not ready"}
+        flags = (getattr(subprocess, "DETACHED_PROCESS", 0)
+                 | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+                 | getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        app_exe = sys.executable if getattr(sys, "frozen", False) else None
         try:
-            flags = (getattr(subprocess, "DETACHED_PROCESS", 0)
-                     | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0))
+            # -EncodedCommand (UTF-16LE) keeps non-ASCII paths intact,
+            # e.g. an Arabic Windows user name in %LOCALAPPDATA%.
+            encoded = base64.b64encode(watcher_script(path, app_exe).encode("utf-16-le")).decode()
             subprocess.Popen(
-                [path, "/SILENT", "/SUPPRESSMSGBOXES", "/NORESTART",
-                 "/CLOSEAPPLICATIONS", "/RESTARTAPPLICATIONS"],
+                ["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
+                 "-WindowStyle", "Hidden", "-EncodedCommand", encoded],
                 creationflags=flags,
                 close_fds=True,
             )
-        except Exception as e:
-            return {"ok": False, "error": str(e)}
+        except Exception:
+            try:
+                subprocess.Popen([path, *INSTALLER_ARGS], creationflags=flags & ~getattr(subprocess, "CREATE_NO_WINDOW", 0), close_fds=True)
+            except Exception as e:
+                return {"ok": False, "error": str(e)}
 
         def _shutdown():
             for w in list(webview.windows):
