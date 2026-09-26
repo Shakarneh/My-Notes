@@ -74,7 +74,7 @@ Shortcuts work on Arabic and Russian keyboard layouts too.
 
 ## Installation
 
-1. Download `MyNotes-Setup-v1.3.0.exe` from the [Releases page](https://github.com/Shakarneh/My-Notes/releases)
+1. Download `MyNotes-Setup-v1.4.0.exe` from the [Releases page](https://github.com/Shakarneh/My-Notes/releases)
 2. Run the installer and follow the steps
 3. Launch **My Notes** from the desktop shortcut or Start Menu
 

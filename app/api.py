@@ -12,7 +12,7 @@ from datetime import datetime
 import webview
 
 
-APP_VERSION = "1.3.0"
+APP_VERSION = "1.4.0"
 GITHUB_REPO = "Shakarneh/My-Notes"
 
 
