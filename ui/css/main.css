@@ -139,14 +139,10 @@ body.focus-mode #sidebar {
 }
 
 #app-icon {
-    width: 26px;
-    height: 26px;
-    padding: 5px;
-    border-radius: 8px;
-    color: var(--on-accent);
-    background: linear-gradient(135deg, var(--accent), rgba(var(--accent-rgb), 0.65));
-    box-shadow: 0 4px 12px var(--accent-glow);
+    width: 28px;
+    height: 28px;
     flex-shrink: 0;
+    filter: drop-shadow(0 4px 10px var(--accent-glow));
 }
 
 #app-title {
@@ -1899,7 +1895,7 @@ html[dir="rtl"] .switch.on span { transform: translateX(-17px); }
 .lang-names small { font-size: 11.5px; color: var(--text-tertiary); }
 
 .about { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 24px 0; gap: 10px; }
-.about-logo svg { width: 64px !important; height: 64px !important; padding: 13px !important; border-radius: 20px !important; }
+.about-logo img { width: 84px; height: 84px; filter: drop-shadow(0 10px 24px rgba(79, 70, 229, 0.35)); }
 .about h3 { font-size: 22px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
 .about-tag { color: var(--text-secondary); font-size: 14px; }
 .about-by { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
@@ -2098,3 +2094,5 @@ html[dir="rtl"] .wn-demo { transform: rotate(1.5deg); }
 .wn-start:hover .wn-arrow { transform: translateX(3px); }
 html[dir="rtl"] .wn-arrow { transform: scaleX(-1); }
 html[dir="rtl"] .wn-start:hover .wn-arrow { transform: scaleX(-1) translateX(3px); }
+.wn-logo { width: 64px; height: 64px; display: block; margin-bottom: 18px; filter: drop-shadow(0 12px 28px rgba(79, 70, 229, 0.45)); animation: wn-pop 0.7s var(--ease) both; }
+@keyframes wn-pop { from { transform: scale(0.4) rotate(-20deg); opacity: 0; } 60% { transform: scale(1.08) rotate(4deg); opacity: 1; } to { transform: none; } }

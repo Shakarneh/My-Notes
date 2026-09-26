@@ -1,3 +1,5 @@
+<p align="center"><img src="ui/assets/logo.png" width="128" alt="My Notes logo"></p>
+
 # My Notes
 
 A fast, beautiful desktop notes app for Windows — built for Arabic (RTL), English and Russian from the ground up, with block-style editing, tables, drawings and full offline support.

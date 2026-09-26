@@ -201,7 +201,7 @@ const Settings = (() => {
             case 'about':
                 return `
                     <div class="about">
-                        <div class="about-logo">${document.getElementById('app-icon')?.outerHTML || ''}</div>
+                        <div class="about-logo"><img src="assets/logo.svg" alt=""></div>
                         <h3>My Note <span class="version-pill">v${UI.esc(settings.version || '')}</span></h3>
                         <p class="about-tag">${t('about_tagline')}</p>
                         <p class="about-by">${t('about_made')} <b>Mohammed Shakarneh</b></p>

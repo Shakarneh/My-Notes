@@ -124,7 +124,8 @@ const WhatsNew = (() => {
                 if (i === 0) menu.classList.add('show');
             }));
             delay += 6 * 130 + 700;
-            later(delay, () => { menu.classList.remove('show'); typed.textContent = ''; table.classList.add('show'); });
+            later(delay, () => { menu.classList.remove('show'); typed.textContent = ''; });
+            later(delay + 250, () => table.classList.add('show'));
             later(delay + 3600, cycle);
         }
         cycle();
@@ -142,6 +143,7 @@ const WhatsNew = (() => {
             <div class="wn-dialog" role="dialog" aria-modal="true">
                 <div class="wn-hero">
                     <div class="wn-copy">
+                        <img class="wn-logo" src="assets/logo.svg" alt="">
                         <span class="wn-badge">✦ ${t('wn_badge')}</span>
                         <h1 class="wn-title">${firstRun ? t('wn_welcome') : t('wn_title', { v: version })}</h1>
                         <p class="wn-sub">${firstRun ? t('wn_sub_first') : t('wn_sub')}</p>
