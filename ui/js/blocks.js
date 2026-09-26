@@ -383,7 +383,11 @@ const Blocks = (() => {
         let left = rtl ? r.right - w : r.left;
         left = Math.max(10, Math.min(left, window.innerWidth - w - 10));
         bar.style.left = left + 'px';
-        bar.style.top = Math.max(10, r.top - bar.offsetHeight - 6) + 'px';
+        // Below the table so it never hides the text above; above only if there's no room
+        const below = r.bottom + 6;
+        bar.style.top = (below + bar.offsetHeight < window.innerHeight - 30
+            ? below
+            : Math.max(10, r.top - bar.offsetHeight - 6)) + 'px';
     }
 
     function initTableToolbar() {

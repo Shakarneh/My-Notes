@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Notes — Free notes app for Windows with full Arabic support | تطبيق ملاحظات عربي</title>
+<meta name="description" content="My Notes is a free, beautiful notes app for Windows with full Arabic (RTL) support, block editing, tables, drawings, 7 languages and automatic updates. تطبيق ملاحظات مجاني لويندوز يدعم العربية بالكامل.">
+<meta name="keywords" content="notes app, Windows, Arabic, RTL, note taking, تطبيق ملاحظات, ملاحظات عربي, مفكرة, free, offline">
+<meta name="theme-color" content="#6a55e8">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="My Notes — beautiful notes for Windows, in Arabic and 6 more languages">
+<meta property="og:description" content="Blocks, tables, drawings, find & replace and automatic updates. Free and works offline.">
+<meta property="og:image" content="https://shakarneh.github.io/My-Notes/social-preview.png">
+<meta property="og:url" content="https://shakarneh.github.io/My-Notes/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://shakarneh.github.io/My-Notes/social-preview.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "My Notes",
+  "operatingSystem": "Windows 10, Windows 11",
+  "applicationCategory": "ProductivityApplication",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "inLanguage": ["ar", "en", "ru", "de", "zh", "es", "it"],
+  "author": { "@type": "Person", "name": "Mohammed Shakarneh" },
+  "downloadUrl": "https://github.com/Shakarneh/My-Notes/releases/latest",
+  "image": "https://shakarneh.github.io/My-Notes/social-preview.png"
+}
+</script>
+<style>
+:root {
+  --bg: #0d0c14; --panel: #15141d; --card: #1b1a25; --line: #2a2836;
+  --text: #f0eef8; --muted: #a7a3b8; --dim: #6f6a82;
+  --accent: #9d8cff; --accent-2: #6a55e8; --pink: #ff7a98; --amber: #f7b955;
+  --font: 'IBM Plex Sans', 'Tajawal', system-ui, sans-serif;
+}
+html[lang="ar"] { --font: 'Tajawal', 'IBM Plex Sans', system-ui, sans-serif; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f6f5f1; --panel: #ffffff; --card: #ffffff; --line: #e6e3dc;
+    --text: #1b1a17; --muted: #5f5b53; --dim: #948f86; --accent: #6a55e8;
+  }
+}
+* { box-sizing: border-box; margin: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+img { max-width: 100%; display: block; }
+.wrap { width: min(1120px, 100% - 32px); margin-inline: auto; }
+
+/* Nav */
+nav { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(12px); background: color-mix(in srgb, var(--bg) 80%, transparent); border-bottom: 1px solid var(--line); }
+nav .wrap { display: flex; align-items: center; gap: 12px; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; text-decoration: none; }
+.brand img { width: 32px; height: 32px; }
+.nav-links { margin-inline-start: auto; display: flex; align-items: center; gap: 6px; }
+.nav-links a, .lang-toggle { padding: 8px 12px; border-radius: 10px; text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 500; background: none; border: none; cursor: pointer; font-family: inherit; }
+.nav-links a:hover, .lang-toggle:hover { color: var(--text); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+@media (max-width: 640px) { .nav-links .hide-sm { display: none; } }
+
+/* Hero */
+.hero { position: relative; padding: 72px 0 40px; text-align: center; overflow: hidden; }
+.hero::before { content: ''; position: absolute; inset: -200px -100px auto; height: 700px; background: radial-gradient(600px 300px at 50% 30%, color-mix(in srgb, var(--accent) 35%, transparent), transparent 70%); pointer-events: none; }
+.hero > * { position: relative; }
+.logo-big { width: 104px; height: 104px; margin: 0 auto 24px; filter: drop-shadow(0 18px 40px rgba(79, 70, 229, .45)); }
+h1 { font-size: clamp(38px, 6vw, 68px); line-height: 1.08; letter-spacing: -1.5px; font-weight: 700; }
+html[lang="ar"] h1 { letter-spacing: 0; line-height: 1.3; }
+h1 .grad { background: linear-gradient(100deg, var(--accent), var(--pink) 60%, var(--amber)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lead { max-width: 680px; margin: 18px auto 0; font-size: clamp(17px, 2vw, 20px); color: var(--muted); }
+.cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 32px; }
+.btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 24px; border-radius: 14px; font-weight: 600; font-size: 16px; text-decoration: none; transition: transform .15s, box-shadow .15s; }
+.btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; box-shadow: 0 12px 30px rgba(106, 85, 232, .4); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(106, 85, 232, .5); }
+.btn-ghost { border: 1px solid var(--line); background: var(--panel); }
+.btn-ghost:hover { transform: translateY(-2px); }
+.btn svg { width: 20px; height: 20px; }
+.meta { margin-top: 14px; font-size: 13px; color: var(--dim); }
+.hero-shot { margin: 48px auto 0; max-width: 1000px; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 40px 100px rgba(0, 0, 0, .45); }
+
+/* Sections */
+section { padding: 72px 0; }
+.eyebrow { color: var(--accent); font-weight: 700; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; text-align: center; }
+html[lang="ar"] .eyebrow { letter-spacing: 0; font-size: 15px; }
+h2 { text-align: center; font-size: clamp(28px, 4vw, 40px); line-height: 1.2; margin-top: 8px; letter-spacing: -.5px; }
+.sub { text-align: center; color: var(--muted); max-width: 620px; margin: 12px auto 0; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 40px; }
+@media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px; transition: transform .2s, border-color .2s; }
+.card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); font-size: 22px; margin-bottom: 14px; }
+.card h3 { font-size: 17px; }
+.card p { color: var(--muted); font-size: 14.5px; margin-top: 6px; }
+
+.gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 40px; }
+@media (max-width: 760px) { .gallery { grid-template-columns: 1fr; } }
+.gallery figure { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.gallery figcaption { padding: 12px 16px; font-size: 14px; color: var(--muted); }
+
+.langs { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 28px; }
+.langs span { padding: 10px 18px; border-radius: 40px; border: 1px solid var(--line); background: var(--card); font-weight: 600; }
+
+.faq { max-width: 760px; margin: 36px auto 0; }
+details { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 20px; margin-bottom: 10px; }
+summary { cursor: pointer; font-weight: 600; }
+details p { color: var(--muted); margin-top: 10px; font-size: 15px; }
+
+.final { text-align: center; padding: 80px 0 96px; }
+footer { border-top: 1px solid var(--line); padding: 28px 0; color: var(--dim); font-size: 14px; }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; }
+footer b { color: var(--text); }
+.heart { color: var(--pink); }
+</style>
+</head>
+<body>
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#"><img src="logo.svg" alt=""><span>My Notes</span></a>
+    <div class="nav-links">
+      <a class="hide-sm" href="#features" data-t="nav_features">Features</a>
+      <a class="hide-sm" href="#faq" data-t="nav_faq">FAQ</a>
+      <a href="https://github.com/Shakarneh/My-Notes" target="_blank" rel="noopener">GitHub ★</a>
+      <button class="lang-toggle" id="lang-toggle" type="button">العربية</button>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <img class="logo-big" src="logo.svg" alt="My Notes logo">
+    <h1><span data-t="h1a">Notes that feel</span> <span class="grad" data-t="h1b">beautiful</span><br><span data-t="h1c">in every language.</span></h1>
+    <p class="lead" data-t="lead">A free notes app for Windows with full Arabic support, block editing, tables, drawings and automatic updates. Works offline.</p>
+    <div class="cta">
+      <a class="btn btn-primary" id="download" href="https://github.com/Shakarneh/My-Notes/releases/latest">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span data-t="download">Download for Windows</span>
+      </a>
+      <a class="btn btn-ghost" href="https://github.com/Shakarneh/My-Notes" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.5 5.73.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.39-5.25 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>
+        <span data-t="star">Star on GitHub</span>
+      </a>
+    </div>
+    <p class="meta" id="meta" data-t="meta">Windows 10 & 11 · Free · No account needed</p>
+    <div class="hero-shot"><img src="screenshots/demo.gif" width="960" height="600" alt="Typing a note with a to-do list, a callout and a table"></div>
+  </div>
+</header>
+
+<section id="features">
+  <div class="wrap">
+    <div class="eyebrow" data-t="f_eyebrow">Everything you need</div>
+    <h2 data-t="f_title">Write faster. Organise without thinking.</h2>
+    <div class="grid">
+      <div class="card"><div class="icon">⧉</div><h3 data-t="f1t">Blocks with /</h3><p data-t="f1d">Type / for headings, to-dos, tables, callouts, quotes, code, dividers and drawings.</p></div>
+      <div class="card"><div class="icon">ع</div><h3 data-t="f2t">Arabic done right</h3><p data-t="f2d">Every paragraph picks its own direction, so Arabic and English live happily in one note.</p></div>
+      <div class="card"><div class="icon">▦</div><h3 data-t="f3t">Tables & drawings</h3><p data-t="f3d">Build tables like in Excel and sketch by hand, right inside your notes.</p></div>
+      <div class="card"><div class="icon">⌕</div><h3 data-t="f4t">Smart search</h3><p data-t="f4d">Finds words with or without Arabic diacritics, in any language. Find & replace with Ctrl+H.</p></div>
+      <div class="card"><div class="icon">↻</div><h3 data-t="f5t">Always up to date</h3><p data-t="f5d">New versions download in the background and install with one click.</p></div>
+      <div class="card"><div class="icon">⛨</div><h3 data-t="f6t">Private & offline</h3><p data-t="f6d">Your notes stay on your computer. Back up everything to one file, any time.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow" data-t="g_eyebrow">Take a look</div>
+    <h2 data-t="g_title">Designed to be a pleasure to use</h2>
+    <div class="gallery">
+      <figure><img loading="lazy" src="screenshots/editor-dark.png" alt=""><figcaption data-t="g1">Headings, to-dos, callouts and tables — in a calm dark theme.</figcaption></figure>
+      <figure><img loading="lazy" src="screenshots/editor-arabic-light.png" alt=""><figcaption data-t="g2">Right-to-left Arabic that just works.</figcaption></figure>
+      <figure><img loading="lazy" src="screenshots/slash-menu.png" alt=""><figcaption data-t="g3">Type / to insert any block.</figcaption></figure>
+      <figure><img loading="lazy" src="screenshots/home-dark.png" alt=""><figcaption data-t="g4">A home screen that greets you and gets you writing.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow" data-t="l_eyebrow">7 languages</div>
+    <h2 data-t="l_title">Speaks your language</h2>
+    <div class="langs"><span>العربية</span><span>English</span><span>Русский</span><span>Deutsch</span><span>中文</span><span>Español</span><span>Italiano</span></div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="eyebrow">FAQ</div>
+    <h2 data-t="q_title">Questions</h2>
+    <div class="faq">
+      <details><summary data-t="q1">Is it really free?</summary><p data-t="a1">Yes. No ads, no account, no subscription.</p></details>
+      <details><summary data-t="q2">Windows says "Windows protected your PC". Is it safe?</summary><p data-t="a2">Yes. Windows shows this for new apps that are not yet code-signed. Click "More info" → "Run anyway". The installer is built automatically on GitHub from the public source code.</p></details>
+      <details><summary data-t="q3">Where are my notes stored?</summary><p data-t="a3">Only on your computer (in %APPDATA%\NotesApp). You can back them up to a single file from Settings.</p></details>
+      <details><summary data-t="q4">How do updates work?</summary><p data-t="a4">The app checks for new versions, downloads them in the background, and asks you to restart. Your notes are never touched.</p></details>
+    </div>
+  </div>
+</section>
+
+<div class="final">
+  <div class="wrap">
+    <h2 data-t="final">Ready to write something beautiful?</h2>
+    <div class="cta"><a class="btn btn-primary" href="https://github.com/Shakarneh/My-Notes/releases/latest"><span data-t="download">Download for Windows</span></a></div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span data-t="made">Made with <span class="heart">♥</span> by <b>Mohammed Shakarneh</b></span>
+    <span><a href="https://github.com/Shakarneh/My-Notes">GitHub</a> · <a href="https://github.com/Shakarneh/My-Notes/issues/new/choose" data-t="feedback">Feedback</a></span>
+  </div>
+</footer>
+
+<script>
+const AR = {
+  nav_features: 'المزايا', nav_faq: 'أسئلة شائعة',
+  h1a: 'ملاحظاتك', h1b: 'أجمل', h1c: 'بكل لغة.',
+  lead: 'تطبيق ملاحظات مجاني لويندوز يدعم العربية بالكامل، مع كتل وجداول ورسم بخط اليد وتحديث تلقائي. يعمل بدون إنترنت.',
+  download: 'تحميل لويندوز', star: 'نجمة على GitHub', meta: 'ويندوز 10 و 11 · مجاني · بدون حساب',
+  f_eyebrow: 'كل ما تحتاجه', f_title: 'اكتب أسرع. ونظّم بدون تفكير.',
+  f1t: 'كتل بلمسة /', f1d: 'اكتب / لإضافة عناوين وقوائم مهام وجداول وتنبيهات واقتباسات وكود وفواصل ورسومات.',
+  f2t: 'العربية كما يجب', f2d: 'كل فقرة تختار اتجاهها بنفسها، فتعيش العربية والإنجليزية معاً في نفس الملاحظة.',
+  f3t: 'جداول ورسومات', f3d: 'أنشئ جداول مثل Excel وارسم بيدك داخل ملاحظاتك.',
+  f4t: 'بحث ذكي', f4d: 'يجد الكلمات بالتشكيل أو بدونه، وبأي لغة. وبحث واستبدال بـ Ctrl+H.',
+  f5t: 'دائماً محدَّث', f5d: 'تُنزَّل الإصدارات الجديدة في الخلفية وتُثبَّت بنقرة واحدة.',
+  f6t: 'خاص وبدون إنترنت', f6d: 'ملاحظاتك تبقى على جهازك. واحفظ نسخة احتياطية في ملف واحد متى شئت.',
+  g_eyebrow: 'ألقِ نظرة', g_title: 'مصمَّم ليكون استخدامه متعة',
+  g1: 'عناوين وقوائم مهام وتنبيهات وجداول — بسمة داكنة هادئة.', g2: 'عربية من اليمين لليسار تعمل ببساطة.',
+  g3: 'اكتب / لإضافة أي كتلة.', g4: 'شاشة رئيسية ترحّب بك وتبدأ بها الكتابة فوراً.',
+  l_eyebrow: '7 لغات', l_title: 'يتحدث لغتك',
+  q_title: 'أسئلة', q1: 'هل هو مجاني فعلاً؟', a1: 'نعم. بدون إعلانات، بدون حساب، بدون اشتراك.',
+  q2: 'ويندوز يقول "Windows protected your PC". هل هو آمن؟', a2: 'نعم. يظهر هذا التنبيه للتطبيقات الجديدة غير الموقّعة رقمياً بعد. اضغط "More info" ثم "Run anyway". ملف التثبيت يُبنى تلقائياً على GitHub من الكود المفتوح.',
+  q3: 'أين تُحفظ ملاحظاتي؟', a3: 'على جهازك فقط (في %APPDATA%\\NotesApp). ويمكنك حفظ نسخة احتياطية في ملف واحد من الإعدادات.',
+  q4: 'كيف تعمل التحديثات؟', a4: 'يبحث التطبيق عن الإصدارات الجديدة وينزّلها في الخلفية ثم يطلب إعادة التشغيل. ملاحظاتك لا تُمس أبداً.',
+  final: 'جاهز لتكتب شيئاً جميلاً؟', made: 'صُنع بـ <span class="heart">♥</span> بواسطة <b>Mohammed Shakarneh</b>', feedback: 'اقتراحات',
+};
+const EN = {};
+document.querySelectorAll('[data-t]').forEach(el => { EN[el.dataset.t] = el.innerHTML; });
+let lang = 'en';
+function setLang(l) {
+  lang = l;
+  const dict = l === 'ar' ? AR : EN;
+  document.documentElement.lang = l;
+  document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-t]').forEach(el => { if (dict[el.dataset.t] !== undefined) el.innerHTML = dict[el.dataset.t]; });
+  document.getElementById('lang-toggle').textContent = l === 'ar' ? 'English' : 'العربية';
+  try { localStorage.setItem('lang', l); } catch {}
+  updateMeta();
+}
+let latest = null;
+function updateMeta() {
+  if (!latest) return;
+  const base = lang === 'ar' ? AR.meta : EN.meta;
+  document.getElementById('meta').textContent = `v${latest} · ${base}`;
+}
+document.getElementById('lang-toggle').addEventListener('click', () => setLang(lang === 'ar' ? 'en' : 'ar'));
+let saved = null; try { saved = localStorage.getItem('lang'); } catch {}
+setLang(saved || ((navigator.language || '').startsWith('ar') ? 'ar' : 'en'));
+
+// Point the download buttons straight at the latest installer
+fetch('https://api.github.com/repos/Shakarneh/My-Notes/releases/latest')
+  .then(r => r.ok ? r.json() : null)
+  .then(rel => {
+    if (!rel) return;
+    latest = (rel.tag_name || '').replace(/^v/, '');
+    const exe = (rel.assets || []).find(a => a.name.toLowerCase().endsWith('.exe'));
+    if (exe) document.querySelectorAll('a.btn-primary').forEach(a => { a.href = exe.browser_download_url; });
+    updateMeta();
+  })
+  .catch(() => {});
+</script>
+</body>
+</html>

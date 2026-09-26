@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#A08BFF"/>
+      <stop offset="0.55" stop-color="#6A55E8"/>
+      <stop offset="1" stop-color="#4338CA"/>
+    </linearGradient>
+    <radialGradient id="shine" cx="0.25" cy="0.15" r="0.75">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="pen" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#FF6B8B"/>
+      <stop offset="1" stop-color="#FFB547"/>
+    </linearGradient>
+    <linearGradient id="fold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#E4DEFF"/>
+      <stop offset="1" stop-color="#C3B8FF"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#1E1466" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="60" fill="url(#bg)"/>
+  <rect x="8" y="8" width="240" height="240" rx="60" fill="url(#shine)"/>
+  <rect x="9" y="9" width="238" height="238" rx="59" fill="none" stroke="#fff" stroke-opacity="0.18" stroke-width="2"/>
+  <g filter="url(#shadow)">
+    <path d="M78 52h74l38 38v96a18 18 0 0 1-18 18H78a18 18 0 0 1-18-18V70a18 18 0 0 1 18-18z" fill="#fff"/>
+    <path d="M152 52v26a12 12 0 0 0 12 12h26z" fill="url(#fold)"/>
+  </g>
+  <rect x="82" y="108" width="80" height="11" rx="5.5" fill="#B9ADFF"/>
+  <rect x="82" y="132" width="92" height="11" rx="5.5" fill="#D4CCFF"/>
+  <rect x="82" y="156" width="54" height="11" rx="5.5" fill="#D4CCFF"/>
+  <g transform="rotate(45 186 170)">
+    <rect x="172" y="104" width="28" height="92" rx="9" fill="url(#pen)" stroke="#fff" stroke-width="5"/>
+    <path d="M172 196h28l-14 24z" fill="#FFE2B8" stroke="#fff" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M181.5 208h9l-4.5 12z" fill="#3B2F7A"/>
+    <rect x="172" y="120" width="28" height="7" fill="#fff" fill-opacity="0.55"/>
+  </g>
+</svg>
