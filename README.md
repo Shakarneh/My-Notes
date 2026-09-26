@@ -2,7 +2,7 @@
 
 # My Notes
 
-A fast, beautiful desktop notes app for Windows — built for Arabic (RTL), English and Russian from the ground up, with block-style editing, tables, drawings and full offline support.
+A fast, beautiful desktop notes app for Windows — in Arabic (RTL), English, Russian, German, Chinese, Spanish and Italian — with block-style editing, tables, drawings, automatic updates and full offline support.
 
 ## Download
 
@@ -20,10 +20,10 @@ A fast, beautiful desktop notes app for Windows — built for Arabic (RTL), Engl
 - **Links** — web addresses and e-mail addresses become links as you type; `Ctrl` + click opens them.
 - **Find & replace** inside a note (`Ctrl+H`) — ignores Arabic diacritics, so "مدرسة" also finds "مَدْرَسَة".
 
-### Arabic & RTL
+### Languages & RTL
+- Seven interface languages: العربية, English, Русский, Deutsch, 中文, Español, Italiano — switch instantly from the sidebar or Settings.
 - Every paragraph picks its own direction automatically, so Arabic and English can live in the same note.
 - Alignment buttons, lists, check-boxes, quotes, callouts and tables all behave correctly right-to-left.
-- The whole interface switches to Arabic, English or Russian with one click.
 
 ### Organising
 - **Home screen** with a greeting, quick-create tiles (note, checklist, table, drawing) and your recent notes.
@@ -35,6 +35,14 @@ A fast, beautiful desktop notes app for Windows — built for Arabic (RTL), Engl
 - **Export** a note to `.txt` or `.html`, **print** it, or **send it by e-mail**.
 - **Backup** all notes to a single JSON file and **import** them back on any computer (imports never overwrite existing notes).
 - Autosave — with a clear *Saving… / Saved ✓* indicator — and `Ctrl+S` to save immediately.
+
+### Settings (`Ctrl+,`)
+- Theme, accent colour and reduced motion; note text size, page width, line spacing and font; spell check; language; automatic updates; backup and data folder.
+
+### Automatic updates
+- The app checks for new versions on start-up and every few hours, downloads them in the background (verified with SHA-256), and installs with one click on **Restart & update**.
+- After updating, a **What's new** screen shows off the new features.
+- A release can be marked as **required** — users then can't keep using an old version.
 
 ### Look & feel
 - Light, dark or automatic theme (by time of day) and six accent colours.
@@ -51,6 +59,7 @@ A fast, beautiful desktop notes app for Windows — built for Arabic (RTL), Engl
 | `Ctrl+H` | Find & replace in the note |
 | `Ctrl+S` | Save now |
 | `Ctrl+\` | Focus mode |
+| `Ctrl+,` | Settings |
 | `/` | Insert a block |
 | `Ctrl+Z` / `Ctrl+Y` | Undo / redo |
 | `Esc` | Close search, menus and focus mode |
@@ -69,7 +78,7 @@ Shortcuts work on Arabic and Russian keyboard layouts too.
 2. Run the installer and follow the steps
 3. Launch **My Notes** from the desktop shortcut or Start Menu
 
-The app checks for new versions on start-up and can update itself in one click.
+The app keeps itself up to date automatically.
 
 ## Running from source
 
@@ -80,7 +89,21 @@ python -m venv .venv
 ```
 
 Notes are stored in `%APPDATA%\NotesApp\notes.db`.
-To build the installer, see `release.ps1` (PyInstaller + Inno Setup).
+Run the tests with `python -m unittest discover tests`.
+
+## Publishing an update
+
+Releases are built in the cloud by GitHub Actions — no Windows build machine needed.
+
+1. Merge your changes into `main`.
+2. On GitHub open **Actions → Build & Release → Run workflow** (branch `main`).
+3. Enter the new **version** (e.g. `1.4.0`) and the **release notes** — one `- item` per line.
+   Add `[required]` anywhere in the notes to force every user to update.
+4. Click **Run workflow**. It bumps the version, tags it, builds the installer and publishes the GitHub Release.
+
+Every installed copy of My Notes finds the release on its next check, downloads it in the background and offers **Restart & update**. New users always get the latest version from the download link above.
+
+Every push to any branch also builds the installer — download it from the run's **Artifacts** to test before releasing. (`release.ps1` still works for building locally on Windows.)
 
 ## Built With
 
